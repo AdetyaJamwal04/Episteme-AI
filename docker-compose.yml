@@ -1,0 +1,92 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: verifact-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - VERIFACT_ENVIRONMENT=production
+      - VERIFACT_HOST=0.0.0.0
+      - VERIFACT_PORT=8000
+      - VERIFACT_DATABASE_URL=postgresql+asyncpg://verifact:verifact_secret@postgres:5432/verifact_db
+      - VERIFACT_REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - hf_cache:/home/verifact/.cache
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: verifact-worker
+    restart: unless-stopped
+    command: ["python", "-c", "import asyncio; from verifact.workers.worker import ResearchWorker; from verifact.workers.queue import JobQueueManager; asyncio.run(ResearchWorker(JobQueueManager()).run_loop())"]
+    environment:
+      - VERIFACT_ENVIRONMENT=production
+      - VERIFACT_DATABASE_URL=postgresql+asyncpg://verifact:verifact_secret@postgres:5432/verifact_db
+      - VERIFACT_REDIS_URL=redis://redis:6379/0
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - TAVILY_API_KEY=${TAVILY_API_KEY:-}
+      - BRAVE_SEARCH_API_KEY=${BRAVE_SEARCH_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - hf_cache:/home/verifact/.cache
+
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: verifact-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: verifact
+      POSTGRES_PASSWORD: verifact_secret
+      POSTGRES_DB: verifact_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U verifact -d verifact_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: verifact-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  postgres_data:
+  redis_data:
+  hf_cache:

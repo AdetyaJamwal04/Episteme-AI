@@ -1,0 +1,452 @@
+[
+  {
+    "benchmark_id": "VF-BM-001",
+    "claim": "The James Webb Space Telescope operates around the Sun-Earth Lagrange Point 2 (L2).",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "SCIENTIFIC"],
+    "domain": "ASTROPHYSICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-002",
+    "claim": "Penicillin was discovered by Alexander Fleming at St. Mary's Hospital in London in 1928.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "HISTORICAL", "MEDICAL"],
+    "domain": "MEDICINE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-003",
+    "claim": "CRISPR-Cas9 was adapted for genome editing in eukaryotic cells by teams including Feng Zhang and Jennifer Doudna.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "SCIENTIFIC"],
+    "domain": "BIOTECHNOLOGY",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-004",
+    "claim": "The speed of light in a vacuum is exactly 299,792,458 meters per second by international definition.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "SCIENTIFIC"],
+    "domain": "PHYSICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-005",
+    "claim": "mRNA vaccines against COVID-19 encode the viral spike protein rather than delivering live attenuated virus.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "MEDICAL", "SCIENTIFIC"],
+    "domain": "MEDICINE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-006",
+    "claim": "India's real GDP grew by 8.2% in financial year 2023-24 according to MoSPI.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "ECONOMICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-007",
+    "claim": "Microsoft completed its acquisition of Activision Blizzard for approximately $68.7 billion in October 2023.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "BUSINESS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-008",
+    "claim": "The European Central Bank reduced its key deposit facility rate by 25 basis points in June 2024.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "FINANCE",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-009",
+    "claim": "Apple reached a market capitalization of $3 trillion for the first time in January 2022 during intraday trading.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "FINANCE",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-010",
+    "claim": "The global human population officially surpassed 8.0 billion people in November 2022 according to the United Nations.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL"],
+    "domain": "DEMOGRAPHICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-011",
+    "claim": "The Great Wall of China is the only human-made structure visible to the unaided naked eye from low Earth orbit.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL"],
+    "domain": "AEROSPACE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-012",
+    "claim": "Humans use only 10% of their brain capacity at any given time.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "SCIENTIFIC"],
+    "domain": "NEUROSCIENCE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-013",
+    "claim": "Albert Einstein failed his high school mathematics courses.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "HISTORICAL"],
+    "domain": "HISTORY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-014",
+    "claim": "The Eiffel Tower was permanently painted gold in honor of the 2024 Paris Olympics.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL"],
+    "domain": "EVENTS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-015",
+    "claim": "Amazon CEO Jeff Bezos stepped down and was succeeded as CEO by Satya Nadella in 2021.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "ATTRIBUTION"],
+    "domain": "BUSINESS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-016",
+    "claim": "The United States Federal Reserve raised interest rates to 15% in 2023.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "FINANCE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-017",
+    "claim": "Antibiotics are effective in directly killing viral pathogens like influenza and rhinovirus.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "MEDICAL"],
+    "domain": "MEDICINE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-018",
+    "claim": "Mount Everest is located entirely within the sovereign territory of India.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL"],
+    "domain": "GEOGRAPHY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-019",
+    "claim": "The Kyoto Protocol was ratified by unanimous vote of the United States Senate in 1998.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "POLITICAL", "HISTORICAL"],
+    "domain": "POLITICS",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-020",
+    "claim": "Python programming language was created by Dennis Ritchie at Bell Labs in 1972.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "HISTORICAL"],
+    "domain": "COMPUTING",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-021",
+    "claim": "Global carbon dioxide emissions dropped by over 50% year-over-year in 2020 due to pandemic lockdowns.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "NUMERICAL"],
+    "domain": "CLIMATE",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-022",
+    "claim": "Tesla delivered 2.5 million vehicles globally in 2023, setting a new company record.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL"],
+    "domain": "BUSINESS",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-023",
+    "claim": "The US national unemployment rate fell to 1.5% in 2023, the lowest level in 70 years.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "NUMERICAL", "FINANCIAL"],
+    "domain": "ECONOMICS",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-024",
+    "claim": "OpenAI was founded in December 2015 as a for-profit public corporation by Sam Altman and Elon Musk.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "HISTORICAL"],
+    "domain": "TECH",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-025",
+    "claim": "NASA's Apollo 11 mission landed Neil Armstrong and Buzz Aldrin on the Moon on July 20, 1969, and they stayed on the lunar surface for 3 weeks.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "HISTORICAL", "TEMPORAL"],
+    "domain": "HISTORY",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-026",
+    "claim": "The United Kingdom is currently an active member state of the European Union.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "POLITICAL", "TEMPORAL"],
+    "domain": "POLITICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-027",
+    "claim": "Barack Obama is the incumbent sitting President of the United States in 2026.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "POLITICAL", "TEMPORAL"],
+    "domain": "POLITICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-028",
+    "claim": "Queen Elizabeth II reigned as monarch of the United Kingdom from February 1952 until her death in September 2022.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "HISTORICAL", "TEMPORAL"],
+    "domain": "HISTORY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-029",
+    "claim": "Pluto is classified as a major planet by the International Astronomical Union as of 2025.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["FACTUAL", "SCIENTIFIC", "TEMPORAL"],
+    "domain": "ASTRONOMY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-030",
+    "claim": "Twitter operates under the corporate name Twitter Inc. with its headquarters located in San Francisco.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "BUSINESS", "TEMPORAL"],
+    "domain": "BUSINESS",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-031",
+    "claim": "Winston Churchill said in 1940: 'If you're going through hell, keep going.'",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["ATTRIBUTION", "HISTORICAL"],
+    "domain": "HISTORY",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-032",
+    "claim": "Neil Armstrong stated 'That's one small step for [a] man, one giant leap for mankind' upon stepping onto the lunar surface in 1969.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["ATTRIBUTION", "HISTORICAL"],
+    "domain": "HISTORY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-033",
+    "claim": "Marie Curie said: 'Be less curious about people and more curious about ideas' in her Nobel banquet speech of 1911.",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["ATTRIBUTION", "HISTORICAL"],
+    "domain": "HISTORY",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-034",
+    "claim": "Martin Luther King Jr. delivered his 'I Have a Dream' speech at the Lincoln Memorial during the March on Washington in August 1963.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["ATTRIBUTION", "HISTORICAL"],
+    "domain": "HISTORY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-035",
+    "claim": "Bill Gates officially stated in 1981 that '640K of memory ought to be enough for anybody.'",
+    "expected_verdict": "REFUTED",
+    "expected_public_label": "LIKELY FALSE",
+    "claim_type": ["ATTRIBUTION", "HISTORICAL"],
+    "domain": "TECH",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-036",
+    "claim": "Google was founded by Larry Page and Sergey Brin in September 1998, and its initial IPO raised $50 billion on the NYSE in 2000.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "COMPOUND", "FINANCIAL"],
+    "domain": "TECH",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-037",
+    "claim": "The Panama Canal connects the Atlantic and Pacific oceans, was completed by France in 1914, and is 50 miles long.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "COMPOUND", "HISTORICAL"],
+    "domain": "GEOGRAPHY",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-038",
+    "claim": "The Human Genome Project began in 1990, was declared complete in 2003, and was funded by the US Department of Energy and NIH.",
+    "expected_verdict": "SUPPORTED",
+    "expected_public_label": "LIKELY TRUE",
+    "claim_type": ["FACTUAL", "COMPOUND", "SCIENTIFIC"],
+    "domain": "GENETICS",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-039",
+    "claim": "Sweden joined NATO in March 2024 as its 32nd member state, whereas Finland rejected NATO membership in 2023.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "COMPOUND", "POLITICAL"],
+    "domain": "GEOPOLITICS",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-040",
+    "claim": "Nvidia designed the H100 GPU architecture, which was released in 2022 and is manufactured by Intel in Oregon.",
+    "expected_verdict": "PARTIALLY_SUPPORTED",
+    "expected_public_label": "PARTIALLY TRUE",
+    "claim_type": ["FACTUAL", "COMPOUND"],
+    "domain": "HARDWARE",
+    "difficulty": "MODERATE"
+  },
+  {
+    "benchmark_id": "VF-BM-041",
+    "claim": "A covert meeting between private executives from Company X and Company Y took place in Zurich on January 14, 2026 to discuss hostile takeover pricing.",
+    "expected_verdict": "INSUFFICIENT_EVIDENCE",
+    "expected_public_label": "UNVERIFIED",
+    "claim_type": ["FACTUAL"],
+    "domain": "BUSINESS",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-042",
+    "claim": "Secret negotiations between country A and country B resulted in an unwritten pact to restrict lithium exports starting Q4 2026.",
+    "expected_verdict": "INSUFFICIENT_EVIDENCE",
+    "expected_public_label": "UNVERIFIED",
+    "claim_type": ["FACTUAL", "POLITICAL"],
+    "domain": "GEOPOLITICS",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-043",
+    "claim": "The anonymous founder of Bitcoin, Satoshi Nakamoto, was a single mathematician born in Germany in 1968.",
+    "expected_verdict": "INSUFFICIENT_EVIDENCE",
+    "expected_public_label": "UNVERIFIED",
+    "claim_type": ["FACTUAL"],
+    "domain": "CRYPTOGRAPHY",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-044",
+    "claim": "A newly formed startup named QuantumVort closed a $100M Series A round led by Benchmark in secret stealth mode in August 2026.",
+    "expected_verdict": "INSUFFICIENT_EVIDENCE",
+    "expected_public_label": "UNVERIFIED",
+    "claim_type": ["FACTUAL", "FINANCIAL"],
+    "domain": "VENTURE_CAPITAL",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-045",
+    "claim": "The ancient library of Alexandria contained exactly 732,419 scrolls at the time of its first fire.",
+    "expected_verdict": "INSUFFICIENT_EVIDENCE",
+    "expected_public_label": "UNVERIFIED",
+    "claim_type": ["FACTUAL", "NUMERICAL", "HISTORICAL"],
+    "domain": "ANCIENT_HISTORY",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-046",
+    "claim": "Vanilla ice cream tastes significantly better than chocolate ice cream.",
+    "expected_verdict": "UNVERIFIABLE",
+    "expected_public_label": "UNVERIFIABLE",
+    "claim_type": ["OPINION"],
+    "domain": "SUBJECTIVE",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-047",
+    "claim": "The government should immediately lower all corporate tax rates to zero.",
+    "expected_verdict": "UNVERIFIABLE",
+    "expected_public_label": "UNVERIFIABLE",
+    "claim_type": ["NORMATIVE", "POLITICAL"],
+    "domain": "POLICY",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-048",
+    "claim": "Modern contemporary art produced after 1990 is culturally inferior to Renaissance oil paintings.",
+    "expected_verdict": "UNVERIFIABLE",
+    "expected_public_label": "UNVERIFIABLE",
+    "claim_type": ["OPINION"],
+    "domain": "AESTHETICS",
+    "difficulty": "EASY"
+  },
+  {
+    "benchmark_id": "VF-BM-049",
+    "claim": "Consciousness in biological organisms is fundamentally reducible to quantum gravitational collapse in microtubules.",
+    "expected_verdict": "UNVERIFIABLE",
+    "expected_public_label": "UNVERIFIABLE",
+    "claim_type": ["SCIENTIFIC", "OPINION"],
+    "domain": "PHILOSOPHY",
+    "difficulty": "HARD"
+  },
+  {
+    "benchmark_id": "VF-BM-050",
+    "claim": "It is morally impermissible to utilize generative AI models to compose creative poetry.",
+    "expected_verdict": "UNVERIFIABLE",
+    "expected_public_label": "UNVERIFIABLE",
+    "claim_type": ["NORMATIVE"],
+    "domain": "ETHICS",
+    "difficulty": "EASY"
+  }
+]

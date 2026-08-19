@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeriFact — Automated Claim Verification & Adaptive Intelligence</title>
+    <meta name="description" content="Evidence-grounded automated claim verification platform powered by Google Gemini 2.0 Flash, NLI cross-examination, and live web retrieval.">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+</head>
+<body class="dark-theme">
+    <!-- Background Glow Orbs -->
+    <div class="bg-glow orb-1"></div>
+    <div class="bg-glow orb-2"></div>
+    <div class="bg-glow orb-3"></div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="brand-icon">🛡️</span>
+                <div class="brand-text">
+                    <span class="brand-name">VeriFact</span>
+                    <span class="brand-tag">Intelligence Engine</span>
+                </div>
+            </div>
+            
+            <div class="nav-meta">
+                <div class="system-status badge-pulse">
+                    <span class="status-dot"></span>
+                    <span class="status-text" id="system-status-text">Connecting...</span>
+                </div>
+                <button class="btn btn-outline" id="btn-history" title="View Recent Verification History">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    History
+                </button>
+                <a href="/docs" target="_blank" class="btn btn-ghost" title="Interactive Swagger API Docs">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+                    API Docs
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        <!-- Hero Section & Claim Input -->
+        <section class="hero-section">
+            <div class="hero-badge">
+                <span>⚡ Powered by Google Gemini 2.0 Flash & Transformer NLI</span>
+            </div>
+            <h1 class="hero-title">Verify Complex Claims with <span class="gradient-text">Grounded Proof</span></h1>
+            <p class="hero-subtitle">Automated atomic proposition decomposition, live primary web retrieval, deterministic validators, and calibrated epistemic verdicts.</p>
+            
+            <!-- Input Card -->
+            <div class="claim-card glass-panel">
+                <form id="verify-form" class="claim-form">
+                    <div class="input-wrapper">
+                        <textarea 
+                            id="claim-input" 
+                            class="claim-textarea" 
+                            placeholder="Enter any complex, multi-part factual claim (e.g. 'The James Webb Space Telescope launched in December 2021 from French Guiana and orbits Earth at 500 km')..." 
+                            rows="3" 
+                            required
+                        ></textarea>
+                        <div class="input-footer">
+                            <span class="char-count" id="char-count">0 / 1000</span>
+                            <button type="button" class="btn-clear" id="btn-clear-input" title="Clear input">Clear</button>
+                        </div>
+                    </div>
+
+                    <!-- Options Bar -->
+                    <div class="form-controls">
+                        <div class="depth-selector-group">
+                            <span class="control-label">Research Depth:</span>
+                            <div class="depth-pills">
+                                <label class="depth-pill active" data-depth="FAST">
+                                    <input type="radio" name="depth" value="FAST" checked>
+                                    <span class="pill-icon">⚡</span>
+                                    <span class="pill-title">Fast</span>
+                                    <span class="pill-desc">&lt; 5s SLA</span>
+                                </label>
+                                <label class="depth-pill" data-depth="STANDARD">
+                                    <input type="radio" name="depth" value="STANDARD">
+                                    <span class="pill-icon">🎯</span>
+                                    <span class="pill-title">Standard</span>
+                                    <span class="pill-desc">Adaptive Loops</span>
+                                </label>
+                                <label class="depth-pill" data-depth="DEEP">
+                                    <input type="radio" name="depth" value="DEEP">
+                                    <span class="pill-icon">🔬</span>
+                                    <span class="pill-title">Deep</span>
+                                    <span class="pill-desc">Multi-Hop DAG</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-submit" id="btn-submit">
+                            <span class="btn-text">Verify Claim</span>
+                            <span class="btn-icon">→</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Example Chips -->
+                <div class="examples-container">
+                    <span class="examples-label">Try Example Claims:</span>
+                    <div class="examples-scroll">
+                        <button class="chip-example" data-claim="The James Webb Space Telescope was successfully launched in December 2021 from French Guiana, and it currently orbits the Earth at an altitude of 500 kilometers.">
+                            🚀 JWST Launch & Orbit
+                        </button>
+                        <button class="chip-example" data-claim="The Eiffel Tower in Paris was completed in 1889 for the World's Fair, standing over 300 meters tall.">
+                            🗼 Eiffel Tower History
+                        </button>
+                        <button class="chip-example" data-claim="The Apollo 11 mission landed on the Moon in July 1969 with Neil Armstrong, Buzz Aldrin, and Michael Collins, and Michael Collins walked on the lunar surface.">
+                            🌕 Apollo 11 Astronauts
+                        </button>
+                        <button class="chip-example" data-claim="OpenAI was founded in December 2015 as an open-source non-profit organization by Sam Altman, Elon Musk, and others.">
+                            🤖 OpenAI Foundation
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State Indicator -->
+        <section id="loading-state" class="loading-state hidden">
+            <div class="loading-card glass-panel">
+                <div class="pulse-loader">
+                    <div class="loader-ring"></div>
+                    <div class="loader-core">🛡️</div>
+                </div>
+                <h3 class="loading-title" id="loading-step-title">Analyzing Claim Propositions...</h3>
+                <p class="loading-subtitle" id="loading-step-desc">Decomposing claim, querying Tavily & Brave search engines, and cross-examining transformer stance models.</p>
+                <div class="loading-steps-bar">
+                    <div class="step-item active">Decomposition</div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-item active">Live Retrieval</div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-item active">Cross-Encoder NLI</div>
+                    <div class="step-arrow">→</div>
+                    <div class="step-item active">Gemini Synthesis</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Display Panel -->
+        <section id="results-panel" class="results-panel hidden">
+            <!-- Hero Verdict Card -->
+            <div class="verdict-banner glass-panel" id="verdict-banner">
+                <div class="verdict-header">
+                    <div class="verdict-badge-container">
+                        <span class="verdict-chip" id="verdict-public-label">VERIFIED TRUE</span>
+                        <span class="internal-label" id="verdict-internal-label">INTERNAL: SUPPORTED</span>
+                    </div>
+                    <div class="verdict-actions">
+                        <button class="btn btn-sm btn-ghost" id="btn-copy-summary" title="Copy Grounded Summary">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+                            Copy Summary
+                        </button>
+                        <button class="btn btn-sm btn-ghost" id="btn-inspect-json" title="Inspect Raw JSON Payload">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                            JSON
+                        </button>
+                    </div>
+                </div>
+
+                <div class="verdict-body">
+                    <!-- Gauge Column -->
+                    <div class="gauge-column">
+                        <div class="radial-gauge-container">
+                            <svg class="radial-gauge" viewBox="0 0 120 120">
+                                <circle class="gauge-bg" cx="60" cy="60" r="50"/>
+                                <circle class="gauge-fill" id="gauge-confidence-fill" cx="60" cy="60" r="50"/>
+                            </svg>
+                            <div class="gauge-content">
+                                <span class="gauge-value" id="gauge-confidence-value">92%</span>
+                                <span class="gauge-caption">Calibrated Confidence</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mini-metrics">
+                            <div class="mini-metric-item">
+                                <span class="mini-label">Sufficiency</span>
+                                <span class="mini-val" id="val-sufficiency">85%</span>
+                            </div>
+                            <div class="mini-metric-item">
+                                <span class="mini-label">Latency</span>
+                                <span class="mini-val" id="val-latency">1.4s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary Column -->
+                    <div class="summary-column">
+                        <h2 class="section-title">Grounded Synthesis</h2>
+                        <p class="summary-text" id="verdict-summary-text"></p>
+                        
+                        <div class="claim-quote-box">
+                            <span class="quote-icon">“</span>
+                            <span class="quote-text" id="verdict-claimed-text"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Analysis Grid -->
+            <div class="details-grid">
+                <!-- Left Column: Atomic Propositions -->
+                <div class="details-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span>🧩</span>
+                                Decomposed Atomic Propositions
+                            </h3>
+                            <span class="badge" id="atomic-count-badge">2 claims</span>
+                        </div>
+                        <p class="panel-desc">Every complex input is isolated into independently checkable factual statements.</p>
+                        <div class="atomic-list" id="atomic-claims-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Grounded Citations & Sources -->
+                <div class="details-col">
+                    <div class="panel-card glass-panel">
+                        <div class="panel-header">
+                            <h3 class="panel-title">
+                                <span>📚</span>
+                                Verified Citations & Primary Sources
+                            </h3>
+                            <span class="badge" id="citations-count-badge">0 sources</span>
+                        </div>
+                        <p class="panel-desc">Direct verbatim quotes extracted from crawled web passages and institutional archives.</p>
+                        <div class="citations-list" id="citations-list">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- History Drawer -->
+    <div class="drawer-overlay" id="history-overlay"></div>
+    <aside class="drawer" id="history-drawer">
+        <div class="drawer-header">
+            <h3 class="drawer-title">Verification History</h3>
+            <button class="btn-close" id="btn-close-history">&times;</button>
+        </div>
+        <div class="drawer-body">
+            <div class="history-list" id="history-list">
+                <p class="empty-state">No recent verifications yet.</p>
+            </div>
+        </div>
+        <div class="drawer-footer">
+            <button class="btn btn-sm btn-outline" id="btn-clear-history">Clear History</button>
+        </div>
+    </aside>
+
+    <!-- JSON Inspector Modal -->
+    <div class="modal-overlay" id="json-modal-overlay">
+        <div class="modal-card glass-panel">
+            <div class="modal-header">
+                <h3 class="modal-title">API Response Inspector</h3>
+                <button class="btn-close" id="btn-close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <pre class="json-code" id="raw-json-viewer"></pre>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-primary" id="btn-copy-raw-json">Copy JSON</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/app.js"></script>
+</body>
+</html>
