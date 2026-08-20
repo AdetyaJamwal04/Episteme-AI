@@ -1,68 +1,40 @@
 /**
- * Episteme — Discover What the Evidence Supports
- * Application Logic & Epistemic Workbench Controller
+ * Episteme Pro — Modern Application Logic
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Navigation Rail View Switching
-    const railItems = document.querySelectorAll('.rail-item[data-view]');
-    const viewContainers = document.querySelectorAll('.view-container');
-    const currentViewTitle = document.getElementById('current-view-title');
+    // 1. Navigation View Switching
+    const navButtons = document.querySelectorAll('.nav-btn[data-view]');
+    const viewPanels = document.querySelectorAll('.view-panel');
 
-    railItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const targetViewId = item.getAttribute('data-view');
-            railItems.forEach(r => r.classList.remove('active'));
-            item.classList.add('active');
+    navButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetView = btn.getAttribute('data-view');
+            navButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
 
-            viewContainers.forEach(vc => {
-                if (vc.id === targetViewId) {
-                    vc.classList.add('active');
+            viewPanels.forEach(p => {
+                if (p.id === targetView) {
+                    p.classList.add('active');
                 } else {
-                    vc.classList.remove('active');
+                    p.classList.remove('active');
                 }
             });
 
-            if (targetViewId === 'verifier-view') {
-                currentViewTitle.textContent = 'Discover What the Evidence Supports';
-            } else if (targetViewId === 'benchmarks-view') {
-                currentViewTitle.textContent = 'Episteme Calibration & Benchmark Telemetry';
-            } else if (targetViewId === 'history-view') {
-                currentViewTitle.textContent = 'Investigation Audit Log';
-                renderAuditHistory();
+            if (targetView === 'history-view') {
+                renderHistory();
             }
         });
     });
 
-    // 2. Workbench Tab Switching
-    const wbTabs = document.querySelectorAll('.wb-tab');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    wbTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            const targetTabId = tab.getAttribute('data-tab');
-            wbTabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
-
-            tabContents.forEach(tc => {
-                if (tc.id === targetTabId) {
-                    tc.classList.add('active');
-                } else {
-                    tc.classList.remove('active');
-                }
-            });
-        });
-    });
-
-    // 3. Elements & Form Controls
+    // 2. Elements & Controls
     const form = document.getElementById('verify-form');
     const claimInput = document.getElementById('claim-input');
     const charCount = document.getElementById('char-count');
-    const btnClearInput = document.getElementById('btn-clear-input');
     const btnSubmit = document.getElementById('btn-submit');
-    const systemStatusPill = document.getElementById('system-status-pill');
-    const segPills = document.querySelectorAll('.seg-pill');
-    const scenarioChips = document.querySelectorAll('.scenario-chip');
+    const depthOptions = document.querySelectorAll('.depth-option');
+    const suggestionCards = document.querySelectorAll('.suggestion-card');
+    const suggestionsBlock = document.getElementById('suggestions-block');
 
     const loadingState = document.getElementById('loading-state');
     const resultsPanel = document.getElementById('results-panel');
@@ -71,11 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const verdictBanner = document.getElementById('verdict-banner');
     const verdictPublicLabel = document.getElementById('verdict-public-label');
     const verdictInternalLabel = document.getElementById('verdict-internal-label');
+    const dialConfidenceNum = document.getElementById('dial-confidence-num');
     const valSufficiency = document.getElementById('val-sufficiency');
     const valLatency = document.getElementById('val-latency');
-    const valStopReason = document.getElementById('val-stop-reason');
-    const dialConfidenceNum = document.getElementById('dial-confidence-num');
-    const dialConfidenceBar = document.getElementById('dial-confidence-bar');
     const verdictSummaryText = document.getElementById('verdict-summary-text');
     const verdictClaimedText = document.getElementById('verdict-claimed-text');
 
@@ -83,122 +53,102 @@ document.addEventListener('DOMContentLoaded', () => {
     const atomicCountBadge = document.getElementById('atomic-count-badge');
     const citationsList = document.getElementById('citations-list');
     const tabEvidenceCount = document.getElementById('tab-evidence-count');
-    const evidenceFilterSelect = document.getElementById('evidence-filter-select');
 
-    // Export Tab Elements
+    // Export Elements
     const markdownReportPreview = document.getElementById('markdown-report-preview');
     const curlSnippetPreview = document.getElementById('curl-snippet-preview');
     const btnCopyMarkdown = document.getElementById('btn-copy-markdown-report');
     const btnDownloadJson = document.getElementById('btn-download-report-json');
     const btnCopyCurl = document.getElementById('btn-copy-curl');
 
-    // Settings Modal
-    const btnOpenSettings = document.getElementById('btn-open-settings');
-    const btnCloseSettings = document.getElementById('btn-close-settings');
-    const settingsModal = document.getElementById('settings-modal');
-    const btnSaveSettings = document.getElementById('btn-save-settings');
-
-    // Audit Log
+    // History Elements
     const auditHistoryContainer = document.getElementById('audit-history-container');
     const btnPurgeHistory = document.getElementById('btn-purge-history');
 
-    let currentVerificationData = null;
+    let currentData = null;
 
-    // 4. System Health Polling
-    async function pollHealth() {
+    // 3. System Status Health Check
+    async function checkHealth() {
         try {
-            const resp = await fetch('/api/v1/health');
-            if (resp.ok) {
-                const data = await resp.json();
-                systemStatusPill.textContent = `Epistemic Engine Online (v${data.version})`;
+            const res = await fetch('/api/v1/health');
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('system-status-pill').textContent = `Online (v${data.version})`;
             }
         } catch {
-            systemStatusPill.textContent = 'Episteme Local Standalone';
+            document.getElementById('system-status-pill').textContent = 'Local Standalone';
         }
     }
-    pollHealth();
+    checkHealth();
 
-    // 5. Input Character Counter & Tools
+    // 4. Character Counter & Textarea Auto-expand
     claimInput.addEventListener('input', () => {
         const len = claimInput.value.length;
         charCount.textContent = `${len} / 1000`;
-        if (len > 1000) {
-            charCount.style.color = 'var(--color-refuted)';
-        } else {
-            charCount.style.color = 'var(--text-dim)';
-        }
+        claimInput.style.height = 'auto';
+        claimInput.style.height = `${Math.min(claimInput.scrollHeight, 180)}px`;
     });
 
-    btnClearInput.addEventListener('click', () => {
-        claimInput.value = '';
-        charCount.textContent = '0 / 1000';
-        claimInput.focus();
-    });
-
-    // 6. Research Depth Pill Selector
-    segPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            segPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            const radio = pill.querySelector('input[type="radio"]');
+    // 5. Research Depth Radio Selector
+    depthOptions.forEach(opt => {
+        opt.addEventListener('click', () => {
+            depthOptions.forEach(o => o.classList.remove('active'));
+            opt.classList.add('active');
+            const radio = opt.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
         });
     });
 
-    // 7. Scenario Chips
-    scenarioChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            const text = chip.getAttribute('data-claim');
+    // 6. Suggestion Card Clicks
+    suggestionCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const text = card.getAttribute('data-claim');
             claimInput.value = text;
             charCount.textContent = `${text.length} / 1000`;
             claimInput.focus();
+            claimInput.dispatchEvent(new Event('input'));
         });
     });
 
-    // 8. Keyboard Shortcuts
+    // 7. Keyboard Shortcuts (Ctrl/Cmd + Enter)
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             e.preventDefault();
             form.dispatchEvent(new Event('submit', { cancelable: true }));
         }
-        if (e.key === 'Escape') {
-            settingsModal.classList.remove('active');
-        }
     });
 
-    // 9. Submit & Execute Verification
+    // 8. Submit Inquiry Form
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const claimText = claimInput.value.trim();
-        if (!claimText) return;
+        const text = claimInput.value.trim();
+        if (!text) return;
 
-        const selectedDepth = document.querySelector('input[name="depth"]:checked')?.value || 'STANDARD';
+        const depth = document.querySelector('input[name="depth"]:checked')?.value || 'FAST';
 
-        // Transition UI to processing state
+        // Transition UI to loading state
         resultsPanel.classList.add('hidden');
         loadingState.classList.remove('hidden');
+        if (suggestionsBlock) suggestionsBlock.classList.add('hidden');
         btnSubmit.disabled = true;
 
         try {
-            const resp = await fetch('/api/v1/check', {
+            const res = await fetch('/api/v1/check', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    claim: claimText,
-                    depth: selectedDepth
-                })
+                body: JSON.stringify({ claim: text, depth: depth })
             });
 
-            if (!resp.ok) {
-                const errData = await resp.json().catch(() => ({ detail: 'Verification failed' }));
-                throw new Error(errData.detail || errData.title || `Server error (${resp.status})`);
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({ detail: 'Verification failed' }));
+                throw new Error(err.detail || err.title || `Server error (${res.status})`);
             }
 
-            const data = await resp.json();
-            currentVerificationData = data;
-            renderAllResults(data, claimText, selectedDepth);
-            saveToAuditLog(data, claimText);
-            showToast('Epistemic examination complete!');
+            const data = await res.json();
+            currentData = data;
+            renderResults(data, text, depth);
+            saveHistory(data, text);
+            showToast('Evidence examined successfully!');
         } catch (err) {
             showToast(`Error: ${err.message}`, 'error');
         } finally {
@@ -207,13 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 10. Render Complete Results
-    function renderAllResults(data, originalClaim, selectedDepth) {
+    // 9. Render Verification Results
+    function renderResults(data, originalClaim, depth) {
         resultsPanel.classList.remove('hidden');
 
         // State classes
-        verdictBanner.className = 'verdict-hero-card';
-        const labelUpper = (data.public_label || 'UNVERIFIABLE').toUpperCase();
+        verdictBanner.className = 'verdict-banner';
+        const labelUpper = (data.public_label || 'UNVERIFIED').toUpperCase();
 
         if (labelUpper.includes('TRUE')) {
             verdictBanner.classList.add('state-true');
@@ -224,247 +174,190 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         verdictPublicLabel.textContent = data.public_label || 'UNVERIFIED';
-        verdictInternalLabel.textContent = `INTERNAL: ${data.verdict || 'UNKNOWN'}`;
+        verdictInternalLabel.textContent = data.verdict || 'UNKNOWN';
 
-        // Top Metadata
+        dialConfidenceNum.textContent = `${Math.round((data.confidence || 0) * 100)}%`;
         valSufficiency.textContent = `${Math.round((data.evidence_sufficiency || 0) * 100)}%`;
         valLatency.textContent = data.latency_ms ? `${(data.latency_ms / 1000).toFixed(2)}s` : '< 1s';
-        valStopReason.textContent = data.stop_reason || 'COMPLETE';
 
-        // Confidence Dial (circumference ~ 364.42)
-        const confidencePct = Math.round((data.confidence || 0) * 100);
-        dialConfidenceNum.textContent = `${confidencePct}%`;
-        const circumference = 2 * Math.PI * 58; // 364.42
-        const offset = circumference - (confidencePct / 100) * circumference;
-        dialConfidenceBar.style.strokeDashoffset = offset;
-
-        // Synthesis and Claim Texts
-        verdictSummaryText.textContent = data.summary_text || 'Synthesis complete.';
+        verdictSummaryText.textContent = data.summary_text || 'Epistemic synthesis complete.';
         verdictClaimedText.textContent = originalClaim;
 
         // Render Atomic Propositions
-        renderAtomicPropositions(originalClaim, data.verdict);
+        renderAtomicClaims(originalClaim, data.verdict);
 
-        // Render Evidence Sources
-        renderEvidenceMatrix(data.citations || []);
+        // Render Cited Sources
+        renderCitations(data.citations || []);
 
-        // Render Export Tab
-        renderExportTab(data, originalClaim, selectedDepth);
+        // Render Export Dossier
+        renderExportDossier(data, originalClaim, depth);
     }
 
-    function renderAtomicPropositions(claimText, parentVerdict) {
+    function renderAtomicClaims(claimText, parentVerdict) {
         atomicClaimsList.innerHTML = '';
         const clauses = claimText.split(/;|\s*,\s*(?:and|whereas|while)\s+/i);
         atomicCountBadge.textContent = `${clauses.length} proposition${clauses.length > 1 ? 's' : ''}`;
 
-        clauses.forEach((clause) => {
-            const trimmed = clause.trim();
+        clauses.forEach((c) => {
+            const trimmed = c.trim();
             if (!trimmed) return;
 
-            const row = document.createElement('div');
-            row.className = 'atomic-proposition-row';
+            const item = document.createElement('div');
+            item.className = 'atomic-item';
             
             const isRefuted = parentVerdict === 'REFUTED';
             const tagClass = isRefuted ? 'contradicted' : (parentVerdict === 'SUPPORTED' ? 'verified' : 'uncertain');
             const tagText = isRefuted ? 'Contradicted' : (parentVerdict === 'SUPPORTED' ? 'Verified' : 'Evaluated');
 
-            row.innerHTML = `
-                <span class="prop-text">${trimmed.endsWith('.') ? trimmed : trimmed + '.'}</span>
-                <span class="prop-status-tag ${tagClass}">${tagText}</span>
+            item.innerHTML = `
+                <span>${trimmed.endsWith('.') ? trimmed : trimmed + '.'}</span>
+                <span class="atomic-tag ${tagClass}">${tagText}</span>
             `;
-            atomicClaimsList.appendChild(row);
+            atomicClaimsList.appendChild(item);
         });
     }
 
-    function renderEvidenceMatrix(citations) {
+    function renderCitations(citations) {
         citationsList.innerHTML = '';
-        tabEvidenceCount.textContent = citations.length;
+        tabEvidenceCount.textContent = `${citations.length} source${citations.length > 1 ? 's' : ''}`;
 
         if (citations.length === 0) {
-            citationsList.innerHTML = '<p class="empty-state">No external citations returned for this statement.</p>';
+            citationsList.innerHTML = '<p class="empty-text">No external citations retrieved.</p>';
             return;
         }
 
         citations.forEach(c => {
             const card = document.createElement('div');
-            card.className = 'evidence-source-card';
-            card.setAttribute('data-authority', c.authority_class || 'SECONDARY');
-
+            card.className = 'citation-card';
             card.innerHTML = `
-                <div class="source-card-header">
-                    <div class="source-link-group">
-                        <span class="source-index-num">${c.citation_id}</span>
-                        <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="source-title-link">
-                            ${c.source_name || c.domain}
-                        </a>
-                    </div>
-                    <span class="source-domain-pill">${c.domain || 'web'}</span>
+                <div class="citation-head">
+                    <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="citation-link">
+                        [${c.citation_id}] ${c.source_name || c.domain}
+                    </a>
+                    <span class="citation-domain">${c.domain || 'web'}</span>
                 </div>
-                <div class="source-quote-block">
-                    "${c.supporting_passage || 'Passage verified by stance classifier.'}"
+                <div class="citation-quote">
+                    "${c.supporting_passage || 'Verified by stance classifier.'}"
                 </div>
             `;
             citationsList.appendChild(card);
         });
     }
 
-    // Evidence Filter Select
-    evidenceFilterSelect.addEventListener('change', () => {
-        const filterVal = evidenceFilterSelect.value;
-        const cards = citationsList.querySelectorAll('.evidence-source-card');
-        cards.forEach(card => {
-            if (filterVal === 'ALL') {
-                card.style.display = 'block';
-            } else {
-                const auth = card.getAttribute('data-authority');
-                card.style.display = (auth === filterVal) ? 'block' : 'none';
-            }
-        });
-    });
+    function renderExportDossier(data, originalClaim, depth) {
+        const md = `# Episteme Investigation Dossier
+**Inquiry:** "${originalClaim}"
+**Verdict:** **${data.public_label}** (${Math.round((data.confidence || 0) * 100)}% Confidence)
+**Sufficiency:** ${Math.round((data.evidence_sufficiency || 0) * 100)}%
 
-    // 11. Export Tab Generator
-    function renderExportTab(data, originalClaim, depth) {
-        // Markdown Report
-        const mdReport = `# Episteme Investigation Dossier
-*Discover What the Evidence Supports*
-
-**Date:** ${new Date().toUTCString()}
-**Request ID:** \`${data.request_id}\`
-
-## 1. Verified Proposition
-> "${originalClaim}"
-
-## 2. Epistemic Verdict
-- **Public Label:** **${data.public_label}**
-- **Internal Verdict:** \`${data.verdict}\`
-- **Calibrated Confidence:** **${Math.round((data.confidence || 0) * 100)}%**
-- **Evidence Sufficiency:** ${Math.round((data.evidence_sufficiency || 0) * 100)}%
-- **Engine Latency:** ${data.latency_ms ? (data.latency_ms / 1000).toFixed(2) + 's' : 'N/A'}
-
-## 3. Grounded Epistemic Synthesis
+## Synthesis
 ${data.summary_text}
 
-## 4. Primary Citations
-${(data.citations || []).map(c => `- **[${c.citation_id}] ${c.source_name}** (${c.domain})\n  *URL:* ${c.url}\n  *Quote:* "${c.supporting_passage}"`).join('\n\n')}
+## Cited Sources
+${(data.citations || []).map(c => `- **[${c.citation_id}] ${c.source_name}** (${c.domain})\n  ${c.url}\n  > "${c.supporting_passage}"`).join('\n\n')}
 `;
-        markdownReportPreview.value = mdReport;
+        markdownReportPreview.value = md;
 
-        // cURL Snippet
-        const curlSnippet = `curl -X POST "http://localhost:8000/api/v1/check" \\
+        const curl = `curl -X POST "https://episteme-ai.onrender.com/api/v1/check" \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify({ claim: originalClaim, depth: depth }, null, 2)}'`;
-        curlSnippetPreview.textContent = curlSnippet;
+        curlSnippetPreview.textContent = curl;
     }
 
     btnCopyMarkdown.addEventListener('click', () => {
         navigator.clipboard.writeText(markdownReportPreview.value);
-        showToast('Episteme dossier copied to clipboard!');
+        showToast('Markdown dossier copied to clipboard!');
     });
 
     btnCopyCurl.addEventListener('click', () => {
         navigator.clipboard.writeText(curlSnippetPreview.textContent);
-        showToast('cURL command copied!');
+        showToast('cURL snippet copied!');
     });
 
     btnDownloadJson.addEventListener('click', () => {
-        if (!currentVerificationData) return;
-        const blob = new Blob([JSON.stringify(currentVerificationData, null, 2)], { type: 'application/json' });
+        if (!currentData) return;
+        const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `episteme_dossier_${currentVerificationData.request_id || Date.now()}.json`;
+        a.download = `episteme_dossier_${currentData.request_id || Date.now()}.json`;
         a.click();
         URL.revokeObjectURL(url);
-        showToast('Episteme JSON dossier downloaded!');
+        showToast('JSON dossier downloaded!');
     });
 
-    // 12. Audit History (LocalStorage)
-    function getAuditLog() {
+    // 10. History Storage
+    function getHistory() {
         try {
-            return JSON.parse(localStorage.getItem('episteme_audit_log') || '[]');
+            return JSON.parse(localStorage.getItem('episteme_history') || '[]');
         } catch {
             return [];
         }
     }
 
-    function saveToAuditLog(data, claimText) {
-        const log = getAuditLog();
-        log.unshift({
+    function saveHistory(data, claimText) {
+        const hist = getHistory();
+        hist.unshift({
             id: data.request_id || Date.now(),
             claim: claimText,
             public_label: data.public_label,
-            verdict: data.verdict,
             confidence: data.confidence,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            full_data: data
+            data: data
         });
-        localStorage.setItem('episteme_audit_log', JSON.stringify(log.slice(0, 30)));
+        localStorage.setItem('episteme_history', JSON.stringify(hist.slice(0, 20)));
     }
 
-    function renderAuditHistory() {
-        const log = getAuditLog();
+    function renderHistory() {
+        const hist = getHistory();
         auditHistoryContainer.innerHTML = '';
 
-        if (log.length === 0) {
-            auditHistoryContainer.innerHTML = '<p class="empty-state">No past investigations found in this browser session.</p>';
+        if (hist.length === 0) {
+            auditHistoryContainer.innerHTML = '<p class="empty-text">No past claims examined in this session yet.</p>';
             return;
         }
 
-        log.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'history-card';
+        hist.forEach(h => {
+            const item = document.createElement('div');
+            item.className = 'history-item';
             
-            const color = (item.public_label || '').includes('TRUE') 
-                ? 'var(--color-verified)' 
-                : ((item.public_label || '').includes('FALSE') ? 'var(--color-refuted)' : 'var(--color-mixture)');
+            const isTrue = (h.public_label || '').includes('TRUE');
+            const isFalse = (h.public_label || '').includes('FALSE');
+            const color = isTrue ? 'var(--color-true)' : (isFalse ? 'var(--color-false)' : 'var(--color-mixture)');
 
-            card.innerHTML = `
-                <div class="history-top-row">
-                    <span class="history-verdict-tag" style="color: ${color};">${item.public_label} (${Math.round((item.confidence || 0) * 100)}%)</span>
-                    <span class="history-time">${item.time}</span>
+            item.innerHTML = `
+                <div class="history-meta">
+                    <span class="history-label" style="color: ${color};">${h.public_label} (${Math.round((h.confidence || 0) * 100)}%)</span>
+                    <span class="history-timestamp">${h.time}</span>
                 </div>
-                <div class="history-claim-title">${item.claim}</div>
+                <div class="history-title">${h.claim}</div>
             `;
 
-            card.addEventListener('click', () => {
-                railItems[0].click();
-                claimInput.value = item.claim;
-                charCount.textContent = `${item.claim.length} / 1000`;
-                currentVerificationData = item.full_data;
-                renderAllResults(item.full_data, item.claim, 'STANDARD');
+            item.addEventListener('click', () => {
+                navButtons[0].click();
+                claimInput.value = h.claim;
+                charCount.textContent = `${h.claim.length} / 1000`;
+                currentData = h.data;
+                renderResults(h.data, h.claim, 'FAST');
             });
 
-            auditHistoryContainer.appendChild(card);
+            auditHistoryContainer.appendChild(item);
         });
     }
 
     btnPurgeHistory.addEventListener('click', () => {
-        localStorage.removeItem('episteme_audit_log');
-        renderAuditHistory();
-        showToast('Audit history cleared');
+        localStorage.removeItem('episteme_history');
+        renderHistory();
+        showToast('History cleared');
     });
 
-    // 13. Settings Modal
-    btnOpenSettings.addEventListener('click', () => settingsModal.classList.add('active'));
-    btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
-    settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) settingsModal.classList.remove('active');
-    });
-    btnSaveSettings.addEventListener('click', () => {
-        settingsModal.classList.remove('active');
-        showToast('Episteme parameters applied');
-    });
-
-    // 14. Toast System
-    function showToast(msg, type = 'info') {
-        const toastContainer = document.getElementById('toast-container');
+    // 11. Toast System
+    function showToast(msg) {
+        const stack = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.className = `toast-item ${type}`;
+        toast.className = 'toast';
         toast.textContent = msg;
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
+        stack.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
     }
 });
