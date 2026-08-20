@@ -1,8 +1,11 @@
-"""Atomic Claim Verdict Evaluator.
+"""
+Atomic Claim Verdict Evaluator.
 
 Evaluates an EvidenceState for an individual proposition and assigns an
 AtomicClaimVerdict (SUPPORTED, REFUTED, CONFLICTED, INSUFFICIENT, UNVERIFIABLE).
 """
+
+from __future__ import annotations
 
 from typing import NamedTuple
 
@@ -52,42 +55,42 @@ class AtomicClaimVerdictEvaluator:
                 verdict=AtomicClaimVerdict.CONFLICTED,
                 support_weight=0.0,
                 contradiction_weight=0.0,
-                confidence=0.5,
+                confidence=0.50,
                 rationale="Unresolved direct contradiction detected between retrieved evidence sources.",
             )
 
         # 2. Compute independent evidence weights
         w_sup = sum(
-            e.independence_score * e.entailment_score * e.relevance_score
+            e.independence_score * e.entailment_score * e.relevance_score * (1.35 if e.source_quality_score >= 0.90 else 1.0)
             for e in evidence_state.supporting_evidence
         )
         w_con = sum(
-            e.independence_score * e.contradiction_score * e.relevance_score
+            e.independence_score * e.contradiction_score * e.relevance_score * (1.35 if e.source_quality_score >= 0.90 else 1.0)
             for e in evidence_state.contradicting_evidence
         )
 
         # 3. Decision threshold logic
-        if w_con >= 0.50 and w_con >= 1.5 * max(w_sup, 0.01):
-            conf = min(0.99, 0.60 + (w_con / (w_con + w_sup + 0.1)) * 0.38)
+        if w_con >= 0.35 and w_con >= 1.3 * max(w_sup, 0.01):
+            conf = min(0.99, 0.65 + (w_con / (w_con + w_sup + 0.1)) * 0.30)
             return AtomicVerdictEvaluation(
                 verdict=AtomicClaimVerdict.REFUTED,
                 support_weight=round(w_sup, 4),
                 contradiction_weight=round(w_con, 4),
                 confidence=round(conf, 4),
-                rationale=f"Contradicting evidence mass ({w_con:.2f}) decisively refutes proposition.",
+                rationale=f"Contradicting evidence mass ({w_con:.2f}) refutes proposition.",
             )
 
-        if w_sup >= 0.50 and w_sup >= 1.5 * max(w_con, 0.01):
-            conf = min(0.99, 0.60 + (w_sup / (w_sup + w_con + 0.1)) * 0.38)
+        if w_sup >= 0.20 and w_sup >= 1.2 * max(w_con, 0.01):
+            conf = min(0.99, 0.70 + (w_sup / (w_sup + w_con + 0.1)) * 0.25)
             return AtomicVerdictEvaluation(
                 verdict=AtomicClaimVerdict.SUPPORTED,
                 support_weight=round(w_sup, 4),
                 contradiction_weight=round(w_con, 4),
                 confidence=round(conf, 4),
-                rationale=f"Supporting evidence mass ({w_sup:.2f}) independently corroborates proposition.",
+                rationale=f"Supporting evidence mass ({w_sup:.2f}) corroborates proposition.",
             )
 
-        if w_sup >= 0.40 and w_con >= 0.40:
+        if w_sup >= 0.25 and w_con >= 0.25:
             return AtomicVerdictEvaluation(
                 verdict=AtomicClaimVerdict.CONFLICTED,
                 support_weight=round(w_sup, 4),

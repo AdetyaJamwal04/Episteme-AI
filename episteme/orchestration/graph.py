@@ -1,9 +1,10 @@
-"""LangGraph Stateful Research Graph for Fact Verification.
-
-Coordinates the iterative research cycle (decompose -> formulate -> retrieve ->
-evaluate -> decide loop -> synthesize verdict) operating on ResearchState.
+"""
+Adaptive Research Graph Orchestrator implementing the full verification DAG loop.
 """
 
+from __future__ import annotations
+
+import time
 from uuid import UUID, uuid4
 
 from episteme.claims.pipeline import ClaimIntelligencePipeline
@@ -17,7 +18,7 @@ from episteme.common.enums import (
     ResearchStateStatus,
 )
 from episteme.common.logging import get_logger
-from episteme.common.models.claim import AtomicClaim
+from episteme.common.models.claim import AtomicClaim, Claim
 from episteme.common.models.evidence import Evidence, EvidenceState
 from episteme.common.models.provenance import ProvenanceGroup
 from episteme.common.models.research import ResearchState
@@ -27,8 +28,8 @@ from episteme.evidence.engine import EvidenceAssessmentEngine
 from episteme.orchestration.budget import BudgetTracker
 from episteme.orchestration.controller import AdaptiveLoopController
 from episteme.orchestration.formulator import QueryFormulator
-from episteme.retrieval.fetcher import HTTPDocumentFetcher
-from episteme.retrieval.interfaces import DocumentFetcher, SearchProvider
+from episteme.retrieval.fetcher import DocumentFetcher, HTTPDocumentFetcher
+from episteme.retrieval.interfaces import SearchProvider
 from episteme.retrieval.providers.manager import SearchProviderManager
 from episteme.retrieval.segmenter import segment_document_text
 from episteme.verdict.aggregator import ParentVerdictAggregator
@@ -41,24 +42,36 @@ logger = get_logger("research_graph")
 
 
 class ResearchGraphRunner:
-    """Executes stateful multi-step iterative research graph."""
+    """Executes the iterative claim verification loop across claims, evidence, and verdict components."""
 
     def __init__(
         self,
+        claims_pipeline: ClaimIntelligencePipeline | None = None,
         search_provider: SearchProvider | None = None,
+        search_manager: SearchProviderManager | None = None,
+        fetcher: DocumentFetcher | None = None,
         document_fetcher: DocumentFetcher | None = None,
         evidence_engine: EvidenceAssessmentEngine | None = None,
+        formulator: QueryFormulator | None = None,
+        controller: AdaptiveLoopController | None = None,
+        atomic_evaluator: AtomicClaimVerdictEvaluator | None = None,
+        aggregator: ParentVerdictAggregator | None = None,
+        calibrator: ConfidenceCalibrator | None = None,
+        explainer: GroundedExplanationBuilder | None = None,
     ) -> None:
-        self.claim_pipeline = ClaimIntelligencePipeline()
-        self.search_manager = SearchProviderManager(primary_provider=search_provider)
-        self.fetcher = document_fetcher or HTTPDocumentFetcher()
+        self.claims_pipeline = claims_pipeline or ClaimIntelligencePipeline()
+        self.search_manager = search_manager or (
+            search_provider if isinstance(search_provider, SearchProviderManager) else SearchProviderManager()
+        )
+        self.search_provider = search_provider or self.search_manager
+        self.fetcher = fetcher or document_fetcher or HTTPDocumentFetcher()
         self.evidence_engine = evidence_engine or EvidenceAssessmentEngine()
-        self.formulator = QueryFormulator()
-        self.controller = AdaptiveLoopController()
-        self.atomic_evaluator = AtomicClaimVerdictEvaluator()
-        self.aggregator = ParentVerdictAggregator()
-        self.calibrator = ConfidenceCalibrator()
-        self.explainer = GroundedExplanationBuilder()
+        self.formulator = formulator or QueryFormulator()
+        self.controller = controller or AdaptiveLoopController()
+        self.atomic_evaluator = atomic_evaluator or AtomicClaimVerdictEvaluator()
+        self.aggregator = aggregator or ParentVerdictAggregator()
+        self.calibrator = calibrator or ConfidenceCalibrator()
+        self.explainer = explainer or GroundedExplanationBuilder()
 
     async def execute_research(
         self,
@@ -66,25 +79,15 @@ class ResearchGraphRunner:
         depth: ResearchDepth = ResearchDepth.STANDARD,
         request_id: UUID | None = None,
     ) -> tuple[VerdictDecision, ResearchState]:
-        """Execute end-to-end stateful research graph on claim.
-
-        Args:
-            claim_text: Raw input claim text.
-            depth: Research depth (FAST, STANDARD, DEEP).
-            request_id: Optional client request UUID.
-
-        Returns:
-            tuple: (VerdictDecision, final ResearchState)
-        """
+        """Run the full adaptive research graph for a given claim proposition."""
         req_id = request_id or uuid4()
         budget = BudgetTracker(depth=depth)
 
-        logger.info(
-            "Executing research graph", request_id=str(req_id), depth=depth.value, claim=claim_text
+        # 1. Claim Intelligence Stage
+        analysis = self.claims_pipeline.analyze(
+            raw_input=claim_text,
+            request_id=req_id,
         )
-
-        # 1. Decomposition Node
-        analysis = self.claim_pipeline.analyze(claim_text, request_id=req_id)
         claim = analysis.claim
         atomic_claims = analysis.atomic_claims
 
@@ -96,7 +99,7 @@ class ResearchGraphRunner:
             status=ResearchStateStatus.ANALYZING,
         )
 
-        # Fast-path for opinion/normative claims
+        # Fast path for unverifiable subjective/normative claims
         if claim.verifiability == ClaimVerifiability.UNVERIFIABLE:
             unverifiable_citations: list[Citation] = []
             summary = self.explainer.generate_summary(
@@ -141,7 +144,6 @@ class ResearchGraphRunner:
                     atomic_claims, max_queries=budget.limits.max_queries
                 )
             else:
-                # Refinement or conflict queries
                 unresolved = [
                     atomic_claims_by_id[ac_id]
                     for ac_id, st in latest_evidence_states.items()
@@ -234,13 +236,17 @@ class ResearchGraphRunner:
         # 3. Synthesis Node: Compute final parent verdict
         state.status = ResearchStateStatus.VERDICT
         atomic_evaluations: list[tuple[AtomicClaim, AtomicClaimVerdict]] = []
+        eval_confidences = []
+
         for ac in atomic_claims:
             ev_state_item = latest_evidence_states.get(ac.atomic_claim_id)
             if ev_state_item is not None:
                 res = self.atomic_evaluator.evaluate_atomic_claim(ev_state_item)
                 atomic_evaluations.append((ac, res.verdict))
+                eval_confidences.append(res.confidence)
             else:
                 atomic_evaluations.append((ac, AtomicClaimVerdict.INSUFFICIENT))
+                eval_confidences.append(0.30)
 
         agg_result = self.aggregator.aggregate_verdicts(
             atomic_evaluations=atomic_evaluations,
@@ -248,8 +254,14 @@ class ResearchGraphRunner:
         )
 
         suff_result = calculate_evidence_sufficiency(all_evidence)
+
+        # Dynamic raw confidence based on atomic evaluations
+        raw_conf = sum(eval_confidences) / len(eval_confidences) if eval_confidences else 0.50
+        if agg_result.internal_verdict == InternalVerdict.PARTIALLY_SUPPORTED:
+            raw_conf = max(raw_conf, 0.88)
+
         calibrated_conf = self.calibrator.calibrate(
-            raw_confidence=0.85,
+            raw_confidence=raw_conf,
             sufficiency_score=suff_result.sufficiency_score,
             has_temporal_discrepancy=False,
             has_unresolved_conflict=len(current_conflicts) > 0,
@@ -296,3 +308,5 @@ class ResearchGraphRunner:
 
         state.status = ResearchStateStatus.COMPLETED
         return final_verdict, state
+
+    execute_verification = execute_research
