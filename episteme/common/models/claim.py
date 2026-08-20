@@ -1,4 +1,6 @@
-"""Core Domain Models for Claims and Propositions."""
+"""
+Core Domain Models for Claims and Propositions.
+"""
 
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
@@ -29,6 +31,8 @@ class AtomicClaim(BaseModel):
     entities: list[str] = Field(default_factory=list)
     temporal_scope: dict[str, str] = Field(default_factory=dict)
     status: AtomicClaimVerdict = AtomicClaimVerdict.INSUFFICIENT
+    is_comparative: bool = False
+    is_causal: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 

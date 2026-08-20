@@ -1,11 +1,10 @@
-"""Materiality-Weighted Parent Claim Aggregator.
-
-Aggregates atomic claim verdicts into canonical InternalVerdict and PublicVerdict
-according to the truth table specified in verifact_docs/00-canonical-enums.md.
+"""
+Parent Verdict Aggregator module with nuanced compound claim arbitration.
 """
 
-from typing import NamedTuple
+from __future__ import annotations
 
+from dataclasses import dataclass
 from episteme.common.enums import (
     INTERNAL_TO_PUBLIC_VERDICT,
     AtomicClaimVerdict,
@@ -17,8 +16,9 @@ from episteme.common.enums import (
 from episteme.common.models.claim import AtomicClaim
 
 
-class ParentAggregationResult(NamedTuple):
-    """Result of parent claim verdict aggregation."""
+@dataclass
+class ParentAggregationResult:
+    """The synthetic outcome of aggregating atomic propositions into a parent claim verdict."""
 
     internal_verdict: InternalVerdict
     public_label: PublicVerdict
@@ -89,7 +89,7 @@ class ParentVerdictAggregator:
         refute_count = all_verdicts.count(AtomicClaimVerdict.REFUTED)
         insufficient_count = all_verdicts.count(AtomicClaimVerdict.INSUFFICIENT)
 
-        # 1. Check if all critical and material propositions are supported
+        # 1. Unanimous Support across all propositions
         if all(v == AtomicClaimVerdict.SUPPORTED for v in all_verdicts):
             return ParentAggregationResult(
                 internal_verdict=InternalVerdict.SUPPORTED,
@@ -98,7 +98,7 @@ class ParentVerdictAggregator:
                 rationale="All atomic propositions independently corroborated.",
             )
 
-        # 2. Check if all propositions are refuted
+        # 2. Unanimous Refutation
         if all(v == AtomicClaimVerdict.REFUTED for v in all_verdicts):
             return ParentAggregationResult(
                 internal_verdict=InternalVerdict.REFUTED,
@@ -107,14 +107,16 @@ class ParentVerdictAggregator:
                 rationale="All atomic propositions decisively refuted by evidence.",
             )
 
-        # 3. Check for mixed truth values (Some supported, some refuted/insufficient)
+        # 3. Mixed Truth Values (true factual premises combined with an unproven/refuted causal leap or error)
         if support_count > 0 and (refute_count > 0 or insufficient_count > 0):
-            # Compound claim with partially true facts
             return ParentAggregationResult(
                 internal_verdict=InternalVerdict.PARTIALLY_SUPPORTED,
                 public_label=PublicVerdict.PARTIALLY_TRUE,
                 framing_concerns=True,
-                rationale=f"Compound claim contains verified facts ({support_count}) alongside inaccurate/unverified elements.",
+                rationale=(
+                    f"Compound claim combines verified factual elements ({support_count}/{len(all_verdicts)}) "
+                    f"with unproven, misleading, or contradicted inferences ({refute_count + insufficient_count}/{len(all_verdicts)})."
+                ),
             )
 
         # 4. Critical proposition refuted with no support

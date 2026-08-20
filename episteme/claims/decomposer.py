@@ -1,10 +1,14 @@
-"""Conservative Atomic Claim Decomposition with Depth Ceiling and Anti-Hallucination Gate.
+"""
+Conservative Atomic Claim Decomposition with Depth Ceiling, Causal Tagging, and Anti-Hallucination Gate.
 
 Decomposes complex/compound claims into independently verifiable AtomicClaim objects.
 Preserves single-element atomic claims without unnecessary fragmentation.
 """
 
+from __future__ import annotations
+
 import re
+from dataclasses import dataclass
 
 from episteme.claims.entity_extractor import extract_named_entities
 from episteme.claims.temporal_extractor import extract_temporal_constraints
@@ -13,17 +17,16 @@ from episteme.common.models.claim import AtomicClaim, Claim
 
 
 def _split_compound_clauses(text: str) -> list[str]:
-    """Split compound sentences along coordinating conjunctions and semicolons."""
-    # Split on semicolons or distinct coordinating clauses (', and', ', whereas', ', while')
-    clauses = re.split(r";|\s*,\s*(?:and|whereas|while|but\s+also)\s+", text, flags=re.IGNORECASE)
+    """Split compound sentences along coordinating conjunctions, causal connectives, and semicolons."""
+    # Split on semicolons or comma-separated coordinating clauses (', and', ', whereas', ', while')
+    clauses = re.split(r";|\s*,\s*(?:and|whereas|while|but\s+also|where|wherein|proving that|which proves that|which proves|resulting in|which led to)\s+", text, flags=re.IGNORECASE)
 
     cleaned_clauses: list[str] = []
     for clause in clauses:
-        c = clause.strip()
-        if len(c.split()) >= 4:  # Meaningful clause length
+        c = clause.strip().rstrip(".").strip(",")
+        if len(c.split()) >= 3:
             if not c.endswith("."):
                 c += "."
-            # Capitalize first character
             c = c[0].upper() + c[1:]
             cleaned_clauses.append(c)
 
@@ -36,7 +39,6 @@ def _validate_anti_hallucination(parent_text: str, atomic_propositions: list[str
 
     for prop in atomic_propositions:
         prop_numbers = set(re.findall(r"\b\d+(?:[.,]\d+)?\b", prop))
-        # If atomic claim contains numbers not in the parent, validation fails
         if not prop_numbers.issubset(parent_numbers):
             return False
 
@@ -50,17 +52,18 @@ def decompose_claim(claim: Claim) -> list[AtomicClaim]:
         claim: The parent Claim object.
 
     Returns:
-        list[AtomicClaim]: List of 1 to 4 atomic claims with materiality and constraints.
+        list[AtomicClaim]: List of atomic claims with materiality, constraints, and causal tags.
     """
     text = claim.normalized_text.strip()
 
-    # 1. Check if the claim is already atomic or simple
     candidate_clauses = _split_compound_clauses(text)
 
-    # If single clause or anti-hallucination check fails, return the single atomic claim
     if len(candidate_clauses) <= 1 or not _validate_anti_hallucination(text, candidate_clauses):
         temporal_info = extract_temporal_constraints(text)
         entities_info = extract_named_entities(text)
+        text_lower = text.lower()
+        is_causal = any(w in text_lower for w in ("prove", "proves", "proving", "because", "due to", "caused"))
+        is_numerical = any(w in text_lower for w in ("₹", "$", "crore", "billion", "million", "%", "metres", "meters", "km"))
 
         return [
             AtomicClaim(
@@ -75,16 +78,19 @@ def decompose_claim(claim: Claim) -> list[AtomicClaim]:
                     t.get("raw_text", ""): str(t.get("year", "")) for t in temporal_info
                 },
                 status=AtomicClaimVerdict.INSUFFICIENT,
+                is_causal=is_causal,
+                is_comparative=is_numerical,
             )
         ]
 
-    # 2. Process compound clauses
     atomic_claims: list[AtomicClaim] = []
-    for idx, clause in enumerate(candidate_clauses[:4]):  # Cap at max 4 sub-claims
+    for idx, clause in enumerate(candidate_clauses[:6]):
         temporal_info = extract_temporal_constraints(clause)
         entities_info = extract_named_entities(clause)
+        clause_lower = clause.lower()
+        is_causal = any(w in clause_lower for w in ("prove", "proves", "proving", "because", "due to", "caused"))
+        is_numerical = any(w in clause_lower for w in ("₹", "$", "crore", "billion", "million", "%", "metres", "meters", "km"))
 
-        # Primary clause is CRITICAL, secondary clauses are MATERIAL
         materiality = Materiality.CRITICAL if idx == 0 else Materiality.MATERIAL
 
         atomic_claims.append(
@@ -100,7 +106,17 @@ def decompose_claim(claim: Claim) -> list[AtomicClaim]:
                     t.get("raw_text", ""): str(t.get("year", "")) for t in temporal_info
                 },
                 status=AtomicClaimVerdict.INSUFFICIENT,
+                is_causal=is_causal,
+                is_comparative=is_numerical,
             )
         )
 
     return atomic_claims
+
+
+@dataclass
+class ConservativeDecomposer:
+    """Wrapper class for atomic proposition decomposition."""
+
+    def decompose(self, claim: Claim) -> list[AtomicClaim]:
+        return decompose_claim(claim)

@@ -1,32 +1,83 @@
-"""Provenance Clustering and Epistemic Independence Scoring.
-
-Groups evidence and documents by canonical domain and exact quotation overlap,
-assigning independence scores to prevent evidence cascade inflation.
 """
+Provenance Grouping, Authority Classification, and Syndication Deduplication.
+
+Computes source independence scores based on domain clustering and verbatim quotation overlap.
+"""
+
+from __future__ import annotations
 
 from urllib.parse import urlparse
 from uuid import UUID, uuid4
 
-from episteme.common.enums import ProvenanceDetectionMethod
+from episteme.common.enums import AuthorityClass, ProvenanceDetectionMethod
 from episteme.common.models.evidence import Evidence
 from episteme.common.models.provenance import ProvenanceGroup
 from episteme.common.models.source import Document, Passage
 
 
+# Authoritative Primary Institutional Domains
+_PRIMARY_INSTITUTIONAL_DOMAINS = {
+    # Space & Science Agencies
+    "isro.gov.in", "nasa.gov", "jpl.nasa.gov", "esa.int", "jaxa.jp", "cnsa.gov.cn", "dlr.de", "cnes.fr",
+    # Government & Official Registries
+    "pib.gov.in", "gov.in", "nic.in", "whitehouse.gov", "gov.uk", "europa.eu", "un.org", "who.int",
+    "cdc.gov", "fda.gov", "nih.gov", "sec.gov", "rbi.org.in", "federalreserve.gov", "ecb.europa.eu",
+    "supremecourt.gov", "sci.gov.in", "judiciary.uk", "justice.gov"
+}
+
+_ACADEMIC_PEER_REVIEWED_DOMAINS = {
+    "nature.com", "science.org", "sciencedirect.com", "cell.com", "thelancet.com", "nejm.org",
+    "pnas.org", "ieee.org", "acm.org", "arxiv.org", "biorxiv.org", "medrxiv.org", "springer.com",
+    "wiley.com", "oup.com", "cambridge.org", "frontiersin.org", "plos.org", "mdpi.com"
+}
+
+_REPUTABLE_SECONDARY_DOMAINS = {
+    "reuters.com", "apnews.com", "bbc.com", "bbc.co.uk", "afp.com", "thehindu.com", "indianexpress.com",
+    "nytimes.com", "wsj.com", "washingtonpost.com", "theguardian.com", "economist.com", "ft.com",
+    "bloomberg.com", "scientificamerican.com", "newscientist.com"
+}
+
+
+def classify_authority_class(url: str, domain: str | None = None) -> AuthorityClass:
+    """Classify the authority tier of a source domain."""
+    if not domain and url:
+        try:
+            parsed = urlparse(url)
+            domain = parsed.netloc.lower().lstrip("www.")
+        except Exception:
+            domain = ""
+
+    if not domain:
+        return AuthorityClass.SECONDARY
+
+    domain_lower = domain.lower().lstrip("www.")
+
+    for prim in _PRIMARY_INSTITUTIONAL_DOMAINS:
+        if domain_lower == prim or domain_lower.endswith("." + prim) or domain_lower.endswith(".gov") or domain_lower.endswith(".gov.in"):
+            return AuthorityClass.PRIMARY
+
+    for acad in _ACADEMIC_PEER_REVIEWED_DOMAINS:
+        if domain_lower == acad or domain_lower.endswith("." + acad) or domain_lower.endswith(".edu") or domain_lower.endswith(".ac.in") or domain_lower.endswith(".ac.uk"):
+            return AuthorityClass.PRIMARY
+
+    for rep in _REPUTABLE_SECONDARY_DOMAINS:
+        if domain_lower == rep or domain_lower.endswith("." + rep):
+            return AuthorityClass.SECONDARY
+
+    return AuthorityClass.SECONDARY
+
+
 def _extract_domain(url: str) -> str:
-    """Extract canonical domain from URL."""
+    """Extract domain from URL."""
     try:
         parsed = urlparse(url)
-        domain = parsed.netloc.lower()
-        if domain.startswith("www."):
-            domain = domain[4:]
-        return domain or "unknown"
+        return parsed.netloc.lower().lstrip("www.") or "unknown"
     except Exception:
         return "unknown"
 
 
 def _compute_ngram_overlap(text_a: str, text_b: str, n: int = 6) -> float:
-    """Compute word n-gram Jaccard similarity between two passage strings."""
+    """Compute Jaccard similarity of n-grams between two text passages."""
     words_a = text_a.lower().split()
     words_b = text_b.lower().split()
 
@@ -46,7 +97,7 @@ def _compute_ngram_overlap(text_a: str, text_b: str, n: int = 6) -> float:
 
 
 class ProvenanceClusterer:
-    """Clusters evidence items into ProvenanceGroups and computes independence weights."""
+    """Clusters evidence items into ProvenanceGroups and computes independence weights with authority escalation."""
 
     def cluster_evidence(
         self,
@@ -54,16 +105,7 @@ class ProvenanceClusterer:
         passages_by_id: dict[UUID, Passage],
         documents_by_id: dict[UUID, Document],
     ) -> tuple[list[ProvenanceGroup], list[Evidence]]:
-        """Group evidence by domain and verbatim quotation overlap.
-
-        Args:
-            evidence_items: List of evaluated Evidence objects.
-            passages_by_id: Mapping of passage_id to Passage object.
-            documents_by_id: Mapping of document_id to Document object.
-
-        Returns:
-            tuple[list[ProvenanceGroup], list[Evidence]]: Created clusters and updated evidence with independence scores.
-        """
+        """Group evidence by domain and verbatim quotation overlap."""
         if not evidence_items:
             return [], []
 
@@ -77,6 +119,11 @@ class ProvenanceClusterer:
             doc = documents_by_id.get(passage.document_id) if passage else None
             domain = _extract_domain(doc.url) if doc else "unknown"
 
+            # Re-classify authority
+            auth = classify_authority_class(doc.url if doc else "", domain)
+            if auth == AuthorityClass.PRIMARY:
+                ev.source_quality_score = max(ev.source_quality_score, 0.95)
+
             if domain not in domain_clusters:
                 group = ProvenanceGroup(
                     provenance_group_id=uuid4(),
@@ -87,13 +134,11 @@ class ProvenanceClusterer:
                 )
                 domain_clusters[domain] = group
                 clusters.append(group)
-                # First document from domain gets full independence
                 ev.independence_score = 1.0
                 ev.provenance_group_id = group.provenance_group_id
             else:
                 group = domain_clusters[domain]
                 group.member_evidence_ids.append(ev.evidence_id)
-                # Subsequent documents from the same domain have discounted independence
                 ev.independence_score = 0.25
                 ev.provenance_group_id = group.provenance_group_id
 
@@ -107,7 +152,6 @@ class ProvenanceClusterer:
 
             for j in range(i + 1, len(updated_evidence)):
                 ev_b = updated_evidence[j]
-                # If already in same group, skip
                 if ev_a.provenance_group_id == ev_b.provenance_group_id:
                     continue
 
@@ -117,7 +161,6 @@ class ProvenanceClusterer:
 
                 overlap = _compute_ngram_overlap(p_a.text, p_b.text, n=6)
                 if overlap >= 0.60:
-                    # High quotation overlap: derivative syndicate copy detected
                     ev_b.independence_score = min(ev_b.independence_score, 0.20)
 
         return clusters, updated_evidence

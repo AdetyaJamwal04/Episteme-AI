@@ -1,11 +1,15 @@
-"""Evidence Sufficiency Gate (Q_suff) Calculation.
+"""
+Evidence Sufficiency Gate (Q_suff) Calculation.
 
 Computes multi-dimensional evidence sufficiency based on independent corroboration,
-relevance, and source authority scores according to verifact_docs/09-verdict-engine.md.
+relevance, and primary source authority scores.
 """
+
+from __future__ import annotations
 
 from typing import NamedTuple
 
+from episteme.common.enums import AuthorityClass
 from episteme.common.models.evidence import Evidence
 
 
@@ -43,12 +47,25 @@ def calculate_evidence_sufficiency(
         )
 
     total_weight = 0.0
+    primary_count = 0
+
     for e in evidence_items:
+        # Check primary authority status
+        is_primary = getattr(e, "authority_class", None) == AuthorityClass.PRIMARY or (e.source_quality_score >= 0.90)
+        if is_primary:
+            primary_count += 1
+
         # Weight = independence_score * source_quality_score * relevance_score
         weight = e.independence_score * e.source_quality_score * e.relevance_score
+        if is_primary:
+            weight *= 1.35  # Primary institutional authority escalation multiplier
         total_weight += weight
 
     q_suff = min(1.0, total_weight / threshold)
+    # If primary institutional source is present, allow sufficiency to reach authoritative status
+    if primary_count > 0:
+        q_suff = max(q_suff, 0.85)
+
     is_sufficient = q_suff >= 0.60
 
     reason = (
