@@ -66,7 +66,7 @@ def main() -> None:
         host = getattr(args, "host", "0.0.0.0")
         port = getattr(args, "port", 8000)
         reload = getattr(args, "reload", False)
-        print(f"🚀 Starting VeriFact API server on http://{host}:{port} (docs at /docs)...")
+        print(f"🚀 Starting Episteme API server on http://{host}:{port} (docs at /docs)...")
         uvicorn.run("verifact.api.app:create_app", factory=True, host=host, port=port, reload=reload)
 
     elif args.command == "verify":

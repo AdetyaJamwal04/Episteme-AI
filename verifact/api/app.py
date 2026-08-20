@@ -19,12 +19,12 @@ logger = get_logger("api_app")
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan context manager handling startup and shutdown hooks."""
-    logger.info("Initializing VeriFact API server")
+    logger.info("Initializing Episteme API server")
     # Initialize shared singletons on app.state
     app.state.job_queue = JobQueueManager()
     app.state.research_engine = AdaptiveResearchEngine()
     yield
-    logger.info("Shutting down VeriFact API server")
+    logger.info("Shutting down Episteme API server")
 
 
 def create_app() -> FastAPI:
@@ -32,7 +32,7 @@ def create_app() -> FastAPI:
     settings = get_settings()
 
     app = FastAPI(
-        title="VeriFact API",
+        title="Episteme API",
         description="Evidence-Grounded Automated Claim Verification & Adaptive Research Platform",
         version="1.0.0",
         docs_url="/docs",

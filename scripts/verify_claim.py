@@ -1,4 +1,4 @@
-"""Interactive CLI for VeriFact Claim Verification.
+"""Interactive CLI for Episteme Claim Verification.
 
 Runs the complete adaptive research engine and fact verification pipeline
 without requiring Docker, PostgreSQL, or Redis.
@@ -79,7 +79,7 @@ async def verify_single_claim(
 
 
 async def main() -> None:
-    parser = argparse.ArgumentParser(description="VeriFact Claim Verification CLI")
+    parser = argparse.ArgumentParser(description="Episteme Claim Verification CLI")
     parser.add_argument("claim", nargs="*", help="The claim text to verify.")
     parser.add_argument(
         "--depth",
@@ -99,7 +99,7 @@ async def main() -> None:
         claim_text = " ".join(parsed_args.claim)
     else:
         print("\n" + "=" * 65)
-        print("🔍 VeriFact — Automated Fact Verification Platform (MVP)")
+        print("🔍 Episteme — Automated Fact Verification Platform (MVP)")
         print("=" * 65)
         claim_text = input("\nEnter a claim to verify (or press Enter for default):\n> ").strip()
         if not claim_text:

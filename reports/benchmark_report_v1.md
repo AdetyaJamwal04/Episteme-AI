@@ -1,4 +1,4 @@
-# VeriFact Evaluation Report — Seed Benchmark v1 (50 Claims)
+# Episteme Evaluation Report — Seed Benchmark v1 (50 Claims)
 
 ## 1. Executive Summary & Quality Gates
 

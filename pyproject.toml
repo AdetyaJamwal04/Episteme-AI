@@ -1,5 +1,5 @@
 [project]
-name = "verifact"
+name = "episteme"
 version = "0.1.0"
 description = "Evidence-Grounded Automated Claim Verification Platform"
 readme = "README.md"

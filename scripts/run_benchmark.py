@@ -1,4 +1,4 @@
-"""CLI Script to Execute the VeriFact 50-Claim Seed Benchmark.
+"""CLI Script to Execute the Episteme 50-Claim Seed Benchmark.
 
 Usage:
     uv run python scripts/run_benchmark.py [--max-claims 10] [--output reports/]
@@ -19,7 +19,7 @@ from verifact.evaluation.runner import BenchmarkRunner
 
 async def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Run VeriFact automated benchmark evaluation suite."
+        description="Run Episteme automated benchmark evaluation suite."
     )
     parser.add_argument(
         "--benchmark-file",
@@ -47,7 +47,7 @@ async def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("\n" + "=" * 65)
-    print("🧪 VeriFact Automated Benchmark Evaluation Suite")
+    print("🧪 Episteme Automated Benchmark Evaluation Suite")
     print(f"📁 Benchmark:  {benchmark_path}")
     print(f"📊 Max Claims: {args.max_claims or 'ALL (50)'}")
     print("=" * 65 + "\n")
