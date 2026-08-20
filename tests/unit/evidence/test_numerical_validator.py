@@ -1,6 +1,6 @@
 """Tests for Numerical Consistency and Tolerance Validator."""
 
-from verifact.evidence.validators.numerical_validator import validate_numerical_consistency
+from episteme.evidence.validators.numerical_validator import validate_numerical_consistency
 
 
 def test_matching_numerical_values() -> None:

@@ -2,16 +2,16 @@
 
 from uuid import uuid4
 
-from verifact.common.enums import (
+from episteme.common.enums import (
     ConflictSeverity,
     ConflictType,
     ResearchDepth,
     ResearchLoopDecision,
 )
-from verifact.common.models.conflict import Conflict
-from verifact.common.models.evidence import EvidenceState
-from verifact.orchestration.budget import BudgetTracker
-from verifact.orchestration.controller import AdaptiveLoopController
+from episteme.common.models.conflict import Conflict
+from episteme.common.models.evidence import EvidenceState
+from episteme.orchestration.budget import BudgetTracker
+from episteme.orchestration.controller import AdaptiveLoopController
 
 
 def test_controller_terminates_on_budget_exhaustion() -> None:

@@ -1,7 +1,7 @@
 """Unit Tests for Degradation Controller and Load Shedding."""
 
-from verifact.common.enums import VerificationMode
-from verifact.orchestration.degradation import DegradationController
+from episteme.common.enums import VerificationMode
+from episteme.orchestration.degradation import DegradationController
 
 
 def test_degradation_normal_load() -> None:

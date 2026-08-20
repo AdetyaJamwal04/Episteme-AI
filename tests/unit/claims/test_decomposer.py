@@ -2,9 +2,9 @@
 
 from uuid import uuid4
 
-from verifact.claims.decomposer import decompose_claim
-from verifact.common.enums import ClaimType, Materiality
-from verifact.common.models.claim import Claim
+from episteme.claims.decomposer import decompose_claim
+from episteme.common.enums import ClaimType, Materiality
+from episteme.common.models.claim import Claim
 
 
 def test_already_atomic_claim_preservation() -> None:

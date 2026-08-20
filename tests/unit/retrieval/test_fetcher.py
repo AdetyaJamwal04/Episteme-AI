@@ -2,8 +2,8 @@
 
 import pytest
 
-from verifact.common.exceptions import SSRFAttemptError
-from verifact.retrieval.fetcher import HTTPDocumentFetcher
+from episteme.common.exceptions import SSRFAttemptError
+from episteme.retrieval.fetcher import HTTPDocumentFetcher
 
 
 @pytest.mark.asyncio

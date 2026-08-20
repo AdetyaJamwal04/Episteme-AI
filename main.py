@@ -12,8 +12,8 @@ import argparse
 import asyncio
 import sys
 
-from verifact.common.enums import VerificationMode
-from verifact.common.logging import get_logger
+from episteme.common.enums import VerificationMode
+from episteme.common.logging import get_logger
 
 logger = get_logger("main")
 
@@ -33,7 +33,7 @@ def main() -> None:
             pass
 
     parser = argparse.ArgumentParser(
-        prog="verifact",
+        prog="episteme",
         description="VeriFact: Evidence-Grounded Automated Claim Verification Platform",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available subcommands")
@@ -67,7 +67,7 @@ def main() -> None:
         port = getattr(args, "port", 8000)
         reload = getattr(args, "reload", False)
         print(f"🚀 Starting Episteme API server on http://{host}:{port} (docs at /docs)...")
-        uvicorn.run("verifact.api.app:create_app", factory=True, host=host, port=port, reload=reload)
+        uvicorn.run("episteme.api.app:create_app", factory=True, host=host, port=port, reload=reload)
 
     elif args.command == "verify":
         claim_text = " ".join(args.claim)

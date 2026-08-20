@@ -2,9 +2,9 @@
 
 import pytest
 
-from verifact.common.enums import BudgetUnit, ResearchDepth
-from verifact.common.exceptions import BudgetExhaustedError
-from verifact.orchestration.budget import BudgetLimits, BudgetTracker
+from episteme.common.enums import BudgetUnit, ResearchDepth
+from episteme.common.exceptions import BudgetExhaustedError
+from episteme.orchestration.budget import BudgetLimits, BudgetTracker
 
 
 def test_budget_limits_by_depth() -> None:

@@ -2,10 +2,10 @@
 
 from uuid import uuid4
 
-from verifact.common.enums import ConflictSeverity, ConflictType
-from verifact.common.models.claim import AtomicClaim
-from verifact.common.models.conflict import Conflict
-from verifact.orchestration.formulator import QueryFormulator
+from episteme.common.enums import ConflictSeverity, ConflictType
+from episteme.common.models.claim import AtomicClaim
+from episteme.common.models.conflict import Conflict
+from episteme.orchestration.formulator import QueryFormulator
 
 
 def test_initial_query_formulation() -> None:

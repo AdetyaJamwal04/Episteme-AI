@@ -5,9 +5,9 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from pydantic import BaseModel, SecretStr
 
-from verifact.common.config import Settings
-from verifact.common.exceptions import ProviderError
-from verifact.models.llm import (
+from episteme.common.config import Settings
+from episteme.common.exceptions import ProviderError
+from episteme.models.llm import (
     BaseLLMClient,
     GeminiLLMClient,
     MockLLMClient,

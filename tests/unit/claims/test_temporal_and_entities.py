@@ -1,7 +1,7 @@
 """Tests for Temporal Constraint and Named Entity Extractors."""
 
-from verifact.claims.entity_extractor import extract_named_entities
-from verifact.claims.temporal_extractor import extract_temporal_constraints
+from episteme.claims.entity_extractor import extract_named_entities
+from episteme.claims.temporal_extractor import extract_temporal_constraints
 
 
 def test_extract_temporal_years_and_dates() -> None:

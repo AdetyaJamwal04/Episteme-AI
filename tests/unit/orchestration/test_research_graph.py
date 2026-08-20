@@ -2,12 +2,12 @@
 
 import pytest
 
-from verifact.common.enums import InternalVerdict, PublicVerdict, ResearchDepth, ResearchStateStatus
-from verifact.evidence.engine import EvidenceAssessmentEngine
-from verifact.models.mock import MockNLIModel, MockRerankerModel
-from verifact.orchestration.engine import AdaptiveResearchEngine
-from verifact.orchestration.graph import ResearchGraphRunner
-from verifact.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
+from episteme.common.enums import InternalVerdict, PublicVerdict, ResearchDepth, ResearchStateStatus
+from episteme.evidence.engine import EvidenceAssessmentEngine
+from episteme.models.mock import MockNLIModel, MockRerankerModel
+from episteme.orchestration.engine import AdaptiveResearchEngine
+from episteme.orchestration.graph import ResearchGraphRunner
+from episteme.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
 
 
 @pytest.mark.asyncio

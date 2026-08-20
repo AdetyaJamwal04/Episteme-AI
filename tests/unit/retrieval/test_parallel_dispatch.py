@@ -2,8 +2,8 @@
 
 import pytest
 
-from verifact.retrieval.interfaces import SearchProvider, SearchResponse, SearchResultItem
-from verifact.retrieval.providers.manager import SearchProviderManager
+from episteme.retrieval.interfaces import SearchProvider, SearchResponse, SearchResultItem
+from episteme.retrieval.providers.manager import SearchProviderManager
 
 
 class DummySearchProvider(SearchProvider):

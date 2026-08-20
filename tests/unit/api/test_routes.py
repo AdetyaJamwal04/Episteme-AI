@@ -3,11 +3,11 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from verifact.api.app import create_app
-from verifact.evidence.engine import EvidenceAssessmentEngine
-from verifact.models.mock import MockNLIModel, MockRerankerModel
-from verifact.orchestration.engine import AdaptiveResearchEngine
-from verifact.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
+from episteme.api.app import create_app
+from episteme.evidence.engine import EvidenceAssessmentEngine
+from episteme.models.mock import MockNLIModel, MockRerankerModel
+from episteme.orchestration.engine import AdaptiveResearchEngine
+from episteme.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
 
 
 @pytest.mark.asyncio

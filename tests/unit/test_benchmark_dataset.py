@@ -3,7 +3,7 @@
 import json
 from pathlib import Path
 
-from verifact.common.enums import InternalVerdict, PublicVerdict
+from episteme.common.enums import InternalVerdict, PublicVerdict
 
 
 def test_seed_benchmark_dataset_validity() -> None:

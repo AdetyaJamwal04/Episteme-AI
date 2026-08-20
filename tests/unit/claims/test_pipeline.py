@@ -4,9 +4,9 @@ from uuid import uuid4
 
 import pytest
 
-from verifact.claims.pipeline import ClaimIntelligencePipeline
-from verifact.common.enums import ClaimType, ClaimVerifiability
-from verifact.common.exceptions import UnsupportedLanguageError
+from episteme.claims.pipeline import ClaimIntelligencePipeline
+from episteme.common.enums import ClaimType, ClaimVerifiability
+from episteme.common.exceptions import UnsupportedLanguageError
 
 
 def test_pipeline_atomic_claim_flow() -> None:

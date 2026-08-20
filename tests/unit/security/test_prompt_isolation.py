@@ -1,6 +1,6 @@
 """Unit Tests for Prompt Injection Defense and Nonce Delimiter Isolation."""
 
-from verifact.common.security.prompt_isolation import PromptIsolator
+from episteme.common.security.prompt_isolation import PromptIsolator
 
 
 def test_generate_nonce_length_and_uniqueness() -> None:

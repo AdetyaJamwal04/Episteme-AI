@@ -2,11 +2,11 @@
 
 import pytest
 
-from verifact.common.exceptions import ProviderError
-from verifact.retrieval.providers.brave_provider import BraveSearchProvider
-from verifact.retrieval.providers.manager import SearchProviderManager
-from verifact.retrieval.providers.mock import MockSearchProvider
-from verifact.retrieval.providers.tavily_provider import TavilySearchProvider
+from episteme.common.exceptions import ProviderError
+from episteme.retrieval.providers.brave_provider import BraveSearchProvider
+from episteme.retrieval.providers.manager import SearchProviderManager
+from episteme.retrieval.providers.mock import MockSearchProvider
+from episteme.retrieval.providers.tavily_provider import TavilySearchProvider
 
 
 @pytest.mark.asyncio

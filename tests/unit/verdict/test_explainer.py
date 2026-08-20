@@ -2,10 +2,10 @@
 
 from uuid import uuid4
 
-from verifact.common.enums import EvidenceRelationship, InternalVerdict
-from verifact.common.models.evidence import Evidence
-from verifact.common.models.source import Document, Passage
-from verifact.verdict.explainer import GroundedExplanationBuilder
+from episteme.common.enums import EvidenceRelationship, InternalVerdict
+from episteme.common.models.evidence import Evidence
+from episteme.common.models.source import Document, Passage
+from episteme.verdict.explainer import GroundedExplanationBuilder
 
 
 def test_citation_building() -> None:

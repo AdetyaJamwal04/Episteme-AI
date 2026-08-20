@@ -1,7 +1,7 @@
 """Tests for HTML and PDF Document Parsers."""
 
-from verifact.retrieval.parsers.html_parser import parse_html_content
-from verifact.retrieval.parsers.pdf_parser import parse_pdf_content
+from episteme.retrieval.parsers.html_parser import parse_html_content
+from episteme.retrieval.parsers.pdf_parser import parse_pdf_content
 
 
 def test_html_main_text_extraction() -> None:

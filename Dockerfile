@@ -65,4 +65,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT:-7860}/api/v1/health || exit 1
 
 # Launch FastAPI web server and UI on $PORT
-CMD ["sh", "-c", "python -m uvicorn verifact.api.app:create_app --factory --host 0.0.0.0 --port ${PORT:-7860}"]
+CMD ["sh", "-c", "python -m uvicorn episteme.api.app:create_app --factory --host 0.0.0.0 --port ${PORT:-7860}"]

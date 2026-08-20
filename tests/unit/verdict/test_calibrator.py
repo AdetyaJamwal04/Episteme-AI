@@ -1,6 +1,6 @@
 """Tests for Confidence Calibrator."""
 
-from verifact.verdict.calibrator import ConfidenceCalibrator
+from episteme.verdict.calibrator import ConfidenceCalibrator
 
 
 def test_confidence_calibration_scaling() -> None:

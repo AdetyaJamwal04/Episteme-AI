@@ -2,9 +2,9 @@
 
 import pytest
 
-from verifact.common.enums import EvidenceRelationship
-from verifact.models.mock import MockEmbeddingModel, MockNLIModel, MockRerankerModel
-from verifact.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
+from episteme.common.enums import EvidenceRelationship
+from episteme.models.mock import MockEmbeddingModel, MockNLIModel, MockRerankerModel
+from episteme.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
 
 
 @pytest.mark.asyncio

@@ -2,7 +2,7 @@
 
 import pytest
 
-from verifact.models.embedding import BGEEmbeddingModel
+from episteme.models.embedding import BGEEmbeddingModel
 
 
 @pytest.mark.asyncio

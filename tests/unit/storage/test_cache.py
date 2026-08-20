@@ -2,8 +2,8 @@
 
 import pytest
 
-from verifact.retrieval.interfaces import SearchResultItem
-from verifact.storage.cache import CacheManager
+from episteme.retrieval.interfaces import SearchResultItem
+from episteme.storage.cache import CacheManager
 
 
 @pytest.mark.asyncio

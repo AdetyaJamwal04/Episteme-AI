@@ -3,8 +3,8 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from verifact.api.app import create_app
-from verifact.api.rate_limiter import RateLimiter
+from episteme.api.app import create_app
+from episteme.api.rate_limiter import RateLimiter
 
 
 def test_rate_limiter_sliding_window_logic() -> None:

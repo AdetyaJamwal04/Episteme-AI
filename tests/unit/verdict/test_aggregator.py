@@ -2,15 +2,15 @@
 
 from uuid import uuid4
 
-from verifact.common.enums import (
+from episteme.common.enums import (
     AtomicClaimVerdict,
     ClaimVerifiability,
     InternalVerdict,
     Materiality,
     PublicVerdict,
 )
-from verifact.common.models.claim import AtomicClaim
-from verifact.verdict.aggregator import ParentVerdictAggregator
+from episteme.common.models.claim import AtomicClaim
+from episteme.verdict.aggregator import ParentVerdictAggregator
 
 
 def test_unverifiable_claim_aggregation() -> None:

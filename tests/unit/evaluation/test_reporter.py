@@ -3,8 +3,8 @@
 import json
 from pathlib import Path
 
-from verifact.evaluation.metrics import evaluate_benchmark_predictions
-from verifact.evaluation.reporter import BenchmarkReporter
+from episteme.evaluation.metrics import evaluate_benchmark_predictions
+from episteme.evaluation.reporter import BenchmarkReporter
 
 
 def test_markdown_and_json_report_generation(tmp_path: Path) -> None:

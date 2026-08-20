@@ -2,9 +2,9 @@
 
 from uuid import uuid4
 
-from verifact.common.enums import ConflictSeverity, ConflictType, EvidenceRelationship
-from verifact.common.models.evidence import Evidence
-from verifact.evidence.conflict_detector import ConflictDetector
+from episteme.common.enums import ConflictSeverity, ConflictType, EvidenceRelationship
+from episteme.common.models.evidence import Evidence
+from episteme.evidence.conflict_detector import ConflictDetector
 
 
 def test_direct_contradiction_detection() -> None:

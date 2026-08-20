@@ -1,6 +1,6 @@
 """Tests for Canonical Enum Taxonomies and Verdict Mappings."""
 
-from verifact.common.enums import (
+from episteme.common.enums import (
     INTERNAL_TO_PUBLIC_VERDICT,
     EvidenceRelationship,
     InternalVerdict,

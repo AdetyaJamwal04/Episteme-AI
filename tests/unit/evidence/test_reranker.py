@@ -2,7 +2,7 @@
 
 import pytest
 
-from verifact.models.reranker import BGERerankerModel
+from episteme.models.reranker import BGERerankerModel
 
 
 @pytest.mark.asyncio

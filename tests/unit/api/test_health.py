@@ -1,6 +1,6 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
-from verifact.api.app import create_app
+from episteme.api.app import create_app
 
 @pytest.mark.asyncio
 async def test_health_check_endpoint() -> None:

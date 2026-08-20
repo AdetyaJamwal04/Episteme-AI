@@ -2,8 +2,8 @@
 
 import pytest
 
-from verifact.common.exceptions import SecurityViolationError
-from verifact.common.security.sanitizer import InputSanitizer
+from episteme.common.exceptions import SecurityViolationError
+from episteme.common.security.sanitizer import InputSanitizer
 
 
 def test_sanitize_valid_claim() -> None:

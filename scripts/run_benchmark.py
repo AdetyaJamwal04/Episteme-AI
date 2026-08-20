@@ -13,8 +13,8 @@ from pathlib import Path
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from verifact.evaluation.reporter import BenchmarkReporter
-from verifact.evaluation.runner import BenchmarkRunner
+from episteme.evaluation.reporter import BenchmarkReporter
+from episteme.evaluation.runner import BenchmarkRunner
 
 
 async def main() -> None:

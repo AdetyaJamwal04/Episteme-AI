@@ -12,10 +12,10 @@ import sys
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from verifact.common.config import get_settings
-from verifact.common.enums import ResearchDepth
-from verifact.orchestration.engine import AdaptiveResearchEngine
-from verifact.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
+from episteme.common.config import get_settings
+from episteme.common.enums import ResearchDepth
+from episteme.orchestration.engine import AdaptiveResearchEngine
+from episteme.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
 
 
 async def verify_single_claim(

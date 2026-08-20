@@ -74,4 +74,6 @@ minversion = "8.0"
 asyncio_mode = "auto"
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-v --cov=verifact --cov-report=term-missing"
+addopts = "-v --cov=episteme --cov-report=term-missing"
+
+

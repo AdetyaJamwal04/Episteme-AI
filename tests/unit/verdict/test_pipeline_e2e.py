@@ -2,11 +2,11 @@
 
 import pytest
 
-from verifact.common.enums import InternalVerdict, PublicVerdict
-from verifact.evidence.engine import EvidenceAssessmentEngine
-from verifact.models.mock import MockNLIModel, MockRerankerModel
-from verifact.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
-from verifact.verdict.pipeline import VeriFactPipeline
+from episteme.common.enums import InternalVerdict, PublicVerdict
+from episteme.evidence.engine import EvidenceAssessmentEngine
+from episteme.models.mock import MockNLIModel, MockRerankerModel
+from episteme.retrieval.providers.mock import MockDocumentFetcher, MockSearchProvider
+from episteme.verdict.pipeline import VeriFactPipeline
 
 
 @pytest.mark.asyncio

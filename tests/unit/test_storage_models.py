@@ -1,7 +1,7 @@
 """Tests for SQLAlchemy ORM Models and Database Setup."""
 
-from verifact.storage.database import get_engine, get_session_factory
-from verifact.storage.models import (
+from episteme.storage.database import get_engine, get_session_factory
+from episteme.storage.models import (
     AtomicClaimORM,
     ClaimORM,
     ConflictORM,
@@ -14,7 +14,7 @@ from verifact.storage.models import (
     VerdictORM,
     VerificationRequestORM,
 )
-from verifact.storage.redis_client import get_redis_client, get_redis_pool
+from episteme.storage.redis_client import get_redis_client, get_redis_pool
 
 
 def test_orm_models_instantiation() -> None:

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from verifact.evaluation.runner import BenchmarkRunner
+from episteme.evaluation.runner import BenchmarkRunner
 
 
 @pytest.mark.asyncio

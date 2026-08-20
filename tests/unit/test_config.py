@@ -2,8 +2,8 @@
 
 from pydantic import SecretStr
 
-from verifact.common.config import Settings, get_settings
-from verifact.common.logging import get_logger, setup_logging
+from episteme.common.config import Settings, get_settings
+from episteme.common.logging import get_logger, setup_logging
 
 
 def test_default_settings() -> None:

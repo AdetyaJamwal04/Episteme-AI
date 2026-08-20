@@ -1,7 +1,7 @@
 """Tests for Multi-Label Semantic Claim Classifier."""
 
-from verifact.claims.classifier import classify_claim
-from verifact.common.enums import ClaimType, ClaimVerifiability
+from episteme.claims.classifier import classify_claim
+from episteme.common.enums import ClaimType, ClaimVerifiability
 
 
 def test_numerical_and_financial_claim() -> None:

@@ -1,6 +1,6 @@
 """Tests for Typed Domain Exception Classes."""
 
-from verifact.common.exceptions import (
+from episteme.common.exceptions import (
     BudgetExhaustedError,
     ClaimDecompositionError,
     ProviderError,

@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from verifact.common.enums import (
+from episteme.common.enums import (
     AuthorityClass,
     ClaimType,
     InternalVerdict,
@@ -14,7 +14,7 @@ from verifact.common.enums import (
     PublicVerdict,
     SourceType,
 )
-from verifact.common.models import (
+from episteme.common.models import (
     AtomicClaim,
     Citation,
     Claim,

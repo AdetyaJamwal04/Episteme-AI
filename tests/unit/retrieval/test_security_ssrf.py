@@ -2,8 +2,8 @@
 
 import pytest
 
-from verifact.common.exceptions import SecurityViolationError, SSRFAttemptError
-from verifact.retrieval.security import is_ip_blocked, validate_url_security
+from episteme.common.exceptions import SecurityViolationError, SSRFAttemptError
+from episteme.retrieval.security import is_ip_blocked, validate_url_security
 
 
 def test_public_urls_allowed() -> None:

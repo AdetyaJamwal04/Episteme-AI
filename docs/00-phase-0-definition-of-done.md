@@ -18,7 +18,7 @@ To prevent premature feature work before the scaffolding is rock-solid, this doc
 
 ### 2.2 Configuration Management
 - [ ] `episteme/common/config.py` implemented using `pydantic-settings`.
-- [ ] Hierarchical configuration: default parameters, YAML override support, and environment variable overrides (`VERIFACT_*` prefix).
+- [ ] Hierarchical configuration: default parameters, YAML override support, and environment variable overrides (`EPISTEME_*` prefix).
 - [ ] Settings include typed configurations for:
   - Database & Redis connection parameters
   - Search provider keys & rate limits

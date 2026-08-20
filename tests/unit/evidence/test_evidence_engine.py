@@ -4,11 +4,11 @@ from uuid import uuid4
 
 import pytest
 
-from verifact.common.enums import EvidenceRelationship
-from verifact.common.models.claim import AtomicClaim
-from verifact.common.models.source import Document, Passage
-from verifact.evidence.engine import EvidenceAssessmentEngine
-from verifact.models.mock import MockNLIModel, MockRerankerModel
+from episteme.common.enums import EvidenceRelationship
+from episteme.common.models.claim import AtomicClaim
+from episteme.common.models.source import Document, Passage
+from episteme.evidence.engine import EvidenceAssessmentEngine
+from episteme.models.mock import MockNLIModel, MockRerankerModel
 
 
 @pytest.mark.asyncio
