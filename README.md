@@ -1,15 +1,4 @@
----
-title: VeriFact — Adaptive Claim Verification Platform
-emoji: 🛡️
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
----
-
-# 🛡️ VeriFact — Evidence-Grounded Automated Claim Verification Platform
+# 🏛️ Episteme — Discover What the Evidence Supports
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-green.svg)](https://fastapi.tiangolo.com/)
@@ -18,7 +7,7 @@ license: mit
 [![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**VeriFact** is an enterprise-grade, evidence-grounded claim verification and automated fact-checking platform. It decomposes compound real-world claims into atomic propositions, retrieves live primary evidence across search engines, cross-examines evidence using transformer-based cross-encoders and Natural Language Inference (NLI), arbitrates contradictory provenance, and synthesizes calibrated, cited verdicts via **Google Gemini 2.0 Flash**.
+**Episteme** (*from Greek ἐπιστήμη — justified true knowledge*) is an enterprise-grade automated claim verification and epistemic intelligence platform. It decomposes compound real-world claims into atomic propositions, retrieves live primary evidence across search engines, cross-examines evidence using transformer-based cross-encoders and Natural Language Inference (NLI), arbitrates contradictory provenance, and synthesizes calibrated, cited verdicts via **Google Gemini 2.0 Flash**.
 
 ---
 
@@ -80,7 +69,7 @@ graph TD
 
 ## 📊 Benchmark Evaluation Performance
 
-Evaluated over the **VeriFact 50-Claim Gold Benchmark Dataset**:
+Evaluated over the **Episteme 50-Claim Gold Benchmark Dataset**:
 
 | Metric | Score | Industry Benchmark |
 | :--- | :---: | :---: |
@@ -101,8 +90,8 @@ Evaluated over the **VeriFact 50-Claim Gold Benchmark Dataset**:
 ### 2. Installation
 ```powershell
 # Clone the repository
-git clone https://github.com/AdetyaJamwal04/VeriFact-Adaptive-Intelligence.git
-cd VeriFact-Adaptive-Intelligence
+git clone https://github.com/AdetyaJamwal04/Episteme.git
+cd Episteme
 
 # Install dependencies with uv
 uv sync --extra dev
@@ -119,7 +108,7 @@ Configure your API keys in `.env`:
 GEMINI_API_KEY=your_gemini_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
-*(Note: If no API keys are provided, VeriFact runs seamlessly in offline simulation mode).*
+*(Note: If no API keys are provided, Episteme runs in offline simulation mode).*
 
 ---
 
@@ -143,7 +132,7 @@ uv run python main.py benchmark
 ```powershell
 uv run python main.py server --port 8000 --reload
 ```
-The Web UI Dashboard is available at **`http://localhost:8000/`** and interactive Swagger documentation at **`http://localhost:8000/docs`**.
+The Web UI Workbench is live at **`http://localhost:8000/`** and interactive Swagger documentation at **`http://localhost:8000/docs`**.
 
 ---
 
@@ -153,11 +142,6 @@ To launch the full production cluster (FastAPI API + Async Worker + PostgreSQL 1
 
 ```powershell
 docker-compose up --build -d
-```
-
-Check cluster health:
-```powershell
-curl http://localhost:8000/api/v1/health
 ```
 
 ---
