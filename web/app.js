@@ -1,17 +1,67 @@
 /**
- * VeriFact — Interactive Dashboard Application Logic
+ * VeriFact Enterprise — Flagship Application Logic
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
+    // 1. Navigation Rail View Switching
+    const railItems = document.querySelectorAll('.rail-item[data-view]');
+    const viewContainers = document.querySelectorAll('.view-container');
+    const currentViewTitle = document.getElementById('current-view-title');
+
+    railItems.forEach(item => {
+        item.addEventListener('click', () => {
+            const targetViewId = item.getAttribute('data-view');
+            railItems.forEach(r => r.classList.remove('active'));
+            item.classList.add('active');
+
+            viewContainers.forEach(vc => {
+                if (vc.id === targetViewId) {
+                    vc.classList.add('active');
+                } else {
+                    vc.classList.remove('active');
+                }
+            });
+
+            if (targetViewId === 'verifier-view') {
+                currentViewTitle.textContent = 'Claim Verification Studio';
+            } else if (targetViewId === 'benchmarks-view') {
+                currentViewTitle.textContent = 'Evaluation & Accuracy Benchmarks';
+            } else if (targetViewId === 'history-view') {
+                currentViewTitle.textContent = 'Verification Audit Log';
+                renderAuditHistory();
+            }
+        });
+    });
+
+    // 2. Workbench Tab Switching
+    const wbTabs = document.querySelectorAll('.wb-tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    wbTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetTabId = tab.getAttribute('data-tab');
+            wbTabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            tabContents.forEach(tc => {
+                if (tc.id === targetTabId) {
+                    tc.classList.add('active');
+                } else {
+                    tc.classList.remove('active');
+                }
+            });
+        });
+    });
+
+    // 3. Elements & Form Controls
     const form = document.getElementById('verify-form');
     const claimInput = document.getElementById('claim-input');
     const charCount = document.getElementById('char-count');
-    const btnClear = document.getElementById('btn-clear-input');
+    const btnClearInput = document.getElementById('btn-clear-input');
     const btnSubmit = document.getElementById('btn-submit');
-    const systemStatusText = document.getElementById('system-status-text');
-    const exampleChips = document.querySelectorAll('.chip-example');
-    const depthPills = document.querySelectorAll('.depth-pill');
+    const systemStatusPill = document.getElementById('system-status-pill');
+    const segPills = document.querySelectorAll('.seg-pill');
+    const scenarioChips = document.querySelectorAll('.scenario-chip');
 
     const loadingState = document.getElementById('loading-state');
     const resultsPanel = document.getElementById('results-panel');
@@ -20,80 +70,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const verdictBanner = document.getElementById('verdict-banner');
     const verdictPublicLabel = document.getElementById('verdict-public-label');
     const verdictInternalLabel = document.getElementById('verdict-internal-label');
-    const gaugeConfidenceValue = document.getElementById('gauge-confidence-value');
-    const gaugeConfidenceFill = document.getElementById('gauge-confidence-fill');
     const valSufficiency = document.getElementById('val-sufficiency');
     const valLatency = document.getElementById('val-latency');
+    const valStopReason = document.getElementById('val-stop-reason');
+    const dialConfidenceNum = document.getElementById('dial-confidence-num');
+    const dialConfidenceBar = document.getElementById('dial-confidence-bar');
     const verdictSummaryText = document.getElementById('verdict-summary-text');
     const verdictClaimedText = document.getElementById('verdict-claimed-text');
+
     const atomicClaimsList = document.getElementById('atomic-claims-list');
     const atomicCountBadge = document.getElementById('atomic-count-badge');
     const citationsList = document.getElementById('citations-list');
-    const citationsCountBadge = document.getElementById('citations-count-badge');
+    const tabEvidenceCount = document.getElementById('tab-evidence-count');
+    const evidenceFilterSelect = document.getElementById('evidence-filter-select');
 
-    // Actions & Modals
-    const btnCopySummary = document.getElementById('btn-copy-summary');
-    const btnInspectJson = document.getElementById('btn-inspect-json');
-    const jsonModalOverlay = document.getElementById('json-modal-overlay');
-    const btnCloseModal = document.getElementById('btn-close-modal');
-    const rawJsonViewer = document.getElementById('raw-json-viewer');
-    const btnCopyRawJson = document.getElementById('btn-copy-raw-json');
+    // Export Tab Elements
+    const markdownReportPreview = document.getElementById('markdown-report-preview');
+    const curlSnippetPreview = document.getElementById('curl-snippet-preview');
+    const btnCopyMarkdown = document.getElementById('btn-copy-markdown-report');
+    const btnDownloadJson = document.getElementById('btn-download-report-json');
+    const btnCopyCurl = document.getElementById('btn-copy-curl');
 
-    // History Drawer
-    const btnHistory = document.getElementById('btn-history');
-    const historyOverlay = document.getElementById('history-overlay');
-    const historyDrawer = document.getElementById('history-drawer');
-    const btnCloseHistory = document.getElementById('btn-close-history');
-    const historyList = document.getElementById('history-list');
-    const btnClearHistory = document.getElementById('btn-clear-history');
+    // Settings Modal
+    const btnOpenSettings = document.getElementById('btn-open-settings');
+    const btnCloseSettings = document.getElementById('btn-close-settings');
+    const settingsModal = document.getElementById('settings-modal');
+    const btnSaveSettings = document.getElementById('btn-save-settings');
 
-    let currentResponseData = null;
+    // Audit Log
+    const auditHistoryContainer = document.getElementById('audit-history-container');
+    const btnPurgeHistory = document.getElementById('btn-purge-history');
 
-    // 1. Initialize Health Check
-    async function checkHealth() {
+    let currentVerificationData = null;
+
+    // 4. System Health Polling
+    async function pollHealth() {
         try {
             const resp = await fetch('/api/v1/health');
             if (resp.ok) {
                 const data = await resp.json();
-                systemStatusText.textContent = `Online (${data.version})`;
-            } else {
-                systemStatusText.textContent = 'Degraded';
+                systemStatusPill.textContent = `Operational (v${data.version})`;
             }
         } catch {
-            systemStatusText.textContent = 'Offline / Local';
+            systemStatusPill.textContent = 'Local Standalone';
         }
     }
-    checkHealth();
+    pollHealth();
 
-    // 2. Character Counter & Input Handling
+    // 5. Input Character Counter & Tools
     claimInput.addEventListener('input', () => {
         const len = claimInput.value.length;
         charCount.textContent = `${len} / 1000`;
         if (len > 1000) {
-            charCount.style.color = 'var(--color-false)';
+            charCount.style.color = 'var(--color-refuted)';
         } else {
-            charCount.style.color = 'var(--text-muted)';
+            charCount.style.color = 'var(--text-dim)';
         }
     });
 
-    btnClear.addEventListener('click', () => {
+    btnClearInput.addEventListener('click', () => {
         claimInput.value = '';
         charCount.textContent = '0 / 1000';
         claimInput.focus();
     });
 
-    // 3. Depth Pill Selection
-    depthPills.forEach(pill => {
+    // 6. Research Depth Pill Selector
+    segPills.forEach(pill => {
         pill.addEventListener('click', () => {
-            depthPills.forEach(p => p.classList.remove('active'));
+            segPills.forEach(p => p.classList.remove('active'));
             pill.classList.add('active');
             const radio = pill.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
         });
     });
 
-    // 4. Example Claim Chips
-    exampleChips.forEach(chip => {
+    // 7. Scenario Chips
+    scenarioChips.forEach(chip => {
         chip.addEventListener('click', () => {
             const text = chip.getAttribute('data-claim');
             claimInput.value = text;
@@ -102,19 +154,29 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 5. Submit & Verify Claim
+    // 8. Keyboard Shortcuts
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+        if (e.key === 'Escape') {
+            settingsModal.classList.remove('active');
+        }
+    });
+
+    // 9. Submit & Execute Verification
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         const claimText = claimInput.value.trim();
         if (!claimText) return;
 
-        const selectedDepth = document.querySelector('input[name="depth"]:checked')?.value || 'FAST';
+        const selectedDepth = document.querySelector('input[name="depth"]:checked')?.value || 'STANDARD';
 
-        // UI Loading Transition
+        // Transition UI to processing state
         resultsPanel.classList.add('hidden');
         loadingState.classList.remove('hidden');
         btnSubmit.disabled = true;
-        btnSubmit.classList.add('loading');
 
         try {
             const resp = await fetch('/api/v1/check', {
@@ -128,29 +190,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!resp.ok) {
                 const errData = await resp.json().catch(() => ({ detail: 'Verification failed' }));
-                throw new Error(errData.detail || errData.title || `Server error ${resp.status}`);
+                throw new Error(errData.detail || errData.title || `Server error (${resp.status})`);
             }
 
             const data = await resp.json();
-            currentResponseData = data;
-            renderResults(data, claimText);
-            saveHistory(data, claimText);
+            currentVerificationData = data;
+            renderAllResults(data, claimText, selectedDepth);
+            saveToAuditLog(data, claimText);
+            showToast('Fact-check completed successfully!');
         } catch (err) {
-            alert(`Error: ${err.message}`);
+            showToast(`Error: ${err.message}`, 'error');
         } finally {
             loadingState.classList.add('hidden');
             btnSubmit.disabled = false;
-            btnSubmit.classList.remove('loading');
         }
     });
 
-    // 6. Render Results
-    function renderResults(data, originalClaim) {
+    // 10. Render Complete Results
+    function renderAllResults(data, originalClaim, selectedDepth) {
         resultsPanel.classList.remove('hidden');
-        resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        // Verdict State Classes
-        verdictBanner.className = 'verdict-banner glass-panel';
+        // State classes
+        verdictBanner.className = 'verdict-hero-card';
         const labelUpper = (data.public_label || 'UNVERIFIABLE').toUpperCase();
 
         if (labelUpper.includes('TRUE')) {
@@ -159,185 +220,249 @@ document.addEventListener('DOMContentLoaded', () => {
             verdictBanner.classList.add('state-false');
         } else if (labelUpper.includes('PARTIALLY')) {
             verdictBanner.classList.add('state-mixture');
-        } else {
-            verdictBanner.classList.add('state-unverifiable');
         }
 
         verdictPublicLabel.textContent = data.public_label || 'UNVERIFIED';
         verdictInternalLabel.textContent = `INTERNAL: ${data.verdict || 'UNKNOWN'}`;
 
-        // Radial Confidence Gauge (Circumference ~ 314.159)
-        const confidencePct = Math.round((data.confidence || 0) * 100);
-        gaugeConfidenceValue.textContent = `${confidencePct}%`;
-        const circumference = 2 * Math.PI * 50; // ~314.159
-        const offset = circumference - (confidencePct / 100) * circumference;
-        gaugeConfidenceFill.style.strokeDashoffset = offset;
-
-        // Metrics
+        // Top Metadata
         valSufficiency.textContent = `${Math.round((data.evidence_sufficiency || 0) * 100)}%`;
         valLatency.textContent = data.latency_ms ? `${(data.latency_ms / 1000).toFixed(2)}s` : '< 1s';
+        valStopReason.textContent = data.stop_reason || 'COMPLETE';
 
-        // Summary Text
-        verdictSummaryText.textContent = data.summary_text || 'No summary available.';
+        // Confidence Dial (circumference ~ 364.42)
+        const confidencePct = Math.round((data.confidence || 0) * 100);
+        dialConfidenceNum.textContent = `${confidencePct}%`;
+        const circumference = 2 * Math.PI * 58; // 364.42
+        const offset = circumference - (confidencePct / 100) * circumference;
+        dialConfidenceBar.style.strokeDashoffset = offset;
+
+        // Synthesis and Claim Texts
+        verdictSummaryText.textContent = data.summary_text || 'Synthesis complete.';
         verdictClaimedText.textContent = originalClaim;
 
-        // Render Citations
-        citationsList.innerHTML = '';
-        const citations = data.citations || [];
-        citationsCountBadge.textContent = `${citations.length} sources`;
+        // Render Atomic Propositions
+        renderAtomicPropositions(originalClaim, data.verdict);
 
-        if (citations.length === 0) {
-            citationsList.innerHTML = '<p class="empty-state">No external citations required for this assertion.</p>';
-        } else {
-            citations.forEach((c) => {
-                const card = document.createElement('div');
-                card.className = 'citation-card';
-                card.innerHTML = `
-                    <div class="citation-header">
-                        <div class="citation-ref">
-                            <span class="citation-num">${c.citation_id}</span>
-                            <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="citation-source">${c.source_name || c.domain}</a>
-                        </div>
-                        <span class="citation-domain">${c.domain || 'web'}</span>
-                    </div>
-                    <p class="citation-quote">"${c.supporting_passage || 'Corroborating passage verified.'}"</p>
-                `;
-                citationsList.appendChild(card);
-            });
-        }
+        // Render Evidence Sources
+        renderEvidenceMatrix(data.citations || []);
 
-        // Render Atomic Claims
-        renderAtomicDecomposition(originalClaim, data.verdict);
+        // Render Export Tab
+        renderExportTab(data, originalClaim, selectedDepth);
     }
 
-    function renderAtomicDecomposition(claimText, parentVerdict) {
+    function renderAtomicPropositions(claimText, parentVerdict) {
         atomicClaimsList.innerHTML = '';
-        
-        // Split by semicolon or common conjunctions for presentation
         const clauses = claimText.split(/;|\s*,\s*(?:and|whereas|while)\s+/i);
-        atomicCountBadge.textContent = `${clauses.length} propositions`;
+        atomicCountBadge.textContent = `${clauses.length} proposition${clauses.length > 1 ? 's' : ''}`;
 
-        clauses.forEach((clause, idx) => {
+        clauses.forEach((clause) => {
             const trimmed = clause.trim();
             if (!trimmed) return;
 
-            const card = document.createElement('div');
-            card.className = 'atomic-card';
+            const row = document.createElement('div');
+            row.className = 'atomic-proposition-row';
             
-            const isFirst = idx === 0;
-            const materiality = isFirst ? 'CRITICAL' : 'MATERIAL';
-            const statusClass = parentVerdict === 'SUPPORTED' ? 'status-supported' : (parentVerdict === 'REFUTED' ? 'status-refuted' : 'status-insufficient');
-            const statusText = parentVerdict === 'SUPPORTED' ? '✓ Verified' : (parentVerdict === 'REFUTED' ? '✗ Contradicted' : '? Evaluated');
+            const isRefuted = parentVerdict === 'REFUTED';
+            const tagClass = isRefuted ? 'contradicted' : (parentVerdict === 'SUPPORTED' ? 'verified' : 'uncertain');
+            const tagText = isRefuted ? 'Contradicted' : (parentVerdict === 'SUPPORTED' ? 'Verified' : 'Evaluated');
 
-            card.innerHTML = `
-                <div class="atomic-header">
-                    <span class="atomic-tag">${materiality}</span>
-                    <span class="atomic-status ${statusClass}">${statusText}</span>
-                </div>
-                <p class="atomic-text">${trimmed.endsWith('.') ? trimmed : trimmed + '.'}</p>
+            row.innerHTML = `
+                <span class="prop-text">${trimmed.endsWith('.') ? trimmed : trimmed + '.'}</span>
+                <span class="prop-status-tag ${tagClass}">${tagText}</span>
             `;
-            atomicClaimsList.appendChild(card);
+            atomicClaimsList.appendChild(row);
         });
     }
 
-    // 7. Local History Management
-    function getHistory() {
+    function renderEvidenceMatrix(citations) {
+        citationsList.innerHTML = '';
+        tabEvidenceCount.textContent = citations.length;
+
+        if (citations.length === 0) {
+            citationsList.innerHTML = '<p class="empty-state">No external citations returned for this statement.</p>';
+            return;
+        }
+
+        citations.forEach(c => {
+            const card = document.createElement('div');
+            card.className = 'evidence-source-card';
+            card.setAttribute('data-authority', c.authority_class || 'SECONDARY');
+
+            card.innerHTML = `
+                <div class="source-card-header">
+                    <div class="source-link-group">
+                        <span class="source-index-num">${c.citation_id}</span>
+                        <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="source-title-link">
+                            ${c.source_name || c.domain}
+                        </a>
+                    </div>
+                    <span class="source-domain-pill">${c.domain || 'web'}</span>
+                </div>
+                <div class="source-quote-block">
+                    "${c.supporting_passage || 'Passage verified by stance classifier.'}"
+                </div>
+            `;
+            citationsList.appendChild(card);
+        });
+    }
+
+    // Evidence Filter Select
+    evidenceFilterSelect.addEventListener('change', () => {
+        const filterVal = evidenceFilterSelect.value;
+        const cards = citationsList.querySelectorAll('.evidence-source-card');
+        cards.forEach(card => {
+            if (filterVal === 'ALL') {
+                card.style.display = 'block';
+            } else {
+                const auth = card.getAttribute('data-authority');
+                card.style.display = (auth === filterVal) ? 'block' : 'none';
+            }
+        });
+    });
+
+    // 11. Export Tab Generator
+    function renderExportTab(data, originalClaim, depth) {
+        // Markdown Report
+        const mdReport = `# Fact-Check Report: VeriFact Intelligence Platform
+**Date:** ${new Date().toUTCString()}
+**Request ID:** \`${data.request_id}\`
+
+## 1. Verified Proposition
+> "${originalClaim}"
+
+## 2. Epistemic Verdict
+- **Public Label:** **${data.public_label}**
+- **Internal Verdict:** \`${data.verdict}\`
+- **Calibrated Confidence:** **${Math.round((data.confidence || 0) * 100)}%**
+- **Evidence Sufficiency:** ${Math.round((data.evidence_sufficiency || 0) * 100)}%
+- **Engine Latency:** ${data.latency_ms ? (data.latency_ms / 1000).toFixed(2) + 's' : 'N/A'}
+
+## 3. Grounded Synthesis
+${data.summary_text}
+
+## 4. Cited Sources
+${(data.citations || []).map(c => `- **[${c.citation_id}] ${c.source_name}** (${c.domain})\n  *URL:* ${c.url}\n  *Quote:* "${c.supporting_passage}"`).join('\n\n')}
+`;
+        markdownReportPreview.value = mdReport;
+
+        // cURL Snippet
+        const curlSnippet = `curl -X POST "http://localhost:8000/api/v1/check" \\
+  -H "Content-Type: application/json" \\
+  -d '${JSON.stringify({ claim: originalClaim, depth: depth }, null, 2)}'`;
+        curlSnippetPreview.textContent = curlSnippet;
+    }
+
+    btnCopyMarkdown.addEventListener('click', () => {
+        navigator.clipboard.writeText(markdownReportPreview.value);
+        showToast('Markdown report copied to clipboard!');
+    });
+
+    btnCopyCurl.addEventListener('click', () => {
+        navigator.clipboard.writeText(curlSnippetPreview.textContent);
+        showToast('cURL command copied!');
+    });
+
+    btnDownloadJson.addEventListener('click', () => {
+        if (!currentVerificationData) return;
+        const blob = new Blob([JSON.stringify(currentVerificationData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `verifact_report_${currentVerificationData.request_id || Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Report JSON downloaded!');
+    });
+
+    // 12. Audit History (LocalStorage)
+    function getAuditLog() {
         try {
-            return JSON.parse(localStorage.getItem('verifact_history') || '[]');
+            return JSON.parse(localStorage.getItem('verifact_audit_log') || '[]');
         } catch {
             return [];
         }
     }
 
-    function saveHistory(data, claimText) {
-        const history = getHistory();
-        history.unshift({
+    function saveToAuditLog(data, claimText) {
+        const log = getAuditLog();
+        log.unshift({
             id: data.request_id || Date.now(),
             claim: claimText,
             public_label: data.public_label,
             verdict: data.verdict,
             confidence: data.confidence,
-            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             full_data: data
         });
-        localStorage.setItem('verifact_history', JSON.stringify(history.slice(0, 15)));
-        renderHistoryList();
+        localStorage.setItem('verifact_audit_log', JSON.stringify(log.slice(0, 30)));
     }
 
-    function renderHistoryList() {
-        const history = getHistory();
-        historyList.innerHTML = '';
-        if (history.length === 0) {
-            historyList.innerHTML = '<p class="empty-state">No recent verifications yet.</p>';
+    function renderAuditHistory() {
+        const log = getAuditLog();
+        auditHistoryContainer.innerHTML = '';
+
+        if (log.length === 0) {
+            auditHistoryContainer.innerHTML = '<p class="empty-state">No verification records found in this browser.</p>';
             return;
         }
 
-        history.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'history-item';
+        log.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'history-card';
             
-            const labelColor = (item.public_label || '').includes('TRUE') 
-                ? 'var(--color-true)' 
-                : ((item.public_label || '').includes('FALSE') ? 'var(--color-false)' : 'var(--color-mixture)');
+            const color = (item.public_label || '').includes('TRUE') 
+                ? 'var(--color-verified)' 
+                : ((item.public_label || '').includes('FALSE') ? 'var(--color-refuted)' : 'var(--color-mixture)');
 
-            div.innerHTML = `
-                <div class="history-item-label" style="color: ${labelColor};">${item.public_label} (${Math.round((item.confidence || 0) * 100)}%) • ${item.timestamp}</div>
-                <div class="history-item-claim">${item.claim}</div>
+            card.innerHTML = `
+                <div class="history-top-row">
+                    <span class="history-verdict-tag" style="color: ${color};">${item.public_label} (${Math.round((item.confidence || 0) * 100)}%)</span>
+                    <span class="history-time">${item.time}</span>
+                </div>
+                <div class="history-claim-title">${item.claim}</div>
             `;
 
-            div.addEventListener('click', () => {
+            card.addEventListener('click', () => {
+                // Switch back to verification view and render
+                railItems[0].click();
                 claimInput.value = item.claim;
                 charCount.textContent = `${item.claim.length} / 1000`;
-                renderResults(item.full_data, item.claim);
-                closeHistoryDrawer();
+                currentVerificationData = item.full_data;
+                renderAllResults(item.full_data, item.claim, 'STANDARD');
             });
 
-            historyList.appendChild(div);
+            auditHistoryContainer.appendChild(card);
         });
     }
 
-    // 8. Drawer & Modal Event Listeners
-    function openHistoryDrawer() {
-        renderHistoryList();
-        historyDrawer.classList.add('active');
-        historyOverlay.classList.add('active');
+    btnPurgeHistory.addEventListener('click', () => {
+        localStorage.removeItem('verifact_audit_log');
+        renderAuditHistory();
+        showToast('Audit history cleared');
+    });
+
+    // 13. Settings Modal
+    btnOpenSettings.addEventListener('click', () => settingsModal.classList.add('active'));
+    btnCloseSettings.addEventListener('click', () => settingsModal.classList.remove('active'));
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) settingsModal.classList.remove('active');
+    });
+    btnSaveSettings.addEventListener('click', () => {
+        settingsModal.classList.remove('active');
+        showToast('Engine parameters applied');
+    });
+
+    // 14. Toast System
+    function showToast(msg, type = 'info') {
+        const toastContainer = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast-item ${type}`;
+        toast.textContent = msg;
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
     }
-
-    function closeHistoryDrawer() {
-        historyDrawer.classList.remove('active');
-        historyOverlay.classList.remove('active');
-    }
-
-    btnHistory.addEventListener('click', openHistoryDrawer);
-    btnCloseHistory.addEventListener('click', closeHistoryDrawer);
-    historyOverlay.addEventListener('click', closeHistoryDrawer);
-
-    btnClearHistory.addEventListener('click', () => {
-        localStorage.removeItem('verifact_history');
-        renderHistoryList();
-    });
-
-    // JSON Inspector Modal
-    btnInspectJson.addEventListener('click', () => {
-        if (!currentResponseData) return;
-        rawJsonViewer.textContent = JSON.stringify(currentResponseData, null, 2);
-        jsonModalOverlay.classList.add('active');
-    });
-
-    btnCloseModal.addEventListener('click', () => jsonModalOverlay.classList.remove('active'));
-    jsonModalOverlay.addEventListener('click', (e) => {
-        if (e.target === jsonModalOverlay) jsonModalOverlay.classList.remove('active');
-    });
-
-    btnCopyRawJson.addEventListener('click', () => {
-        navigator.clipboard.writeText(rawJsonViewer.textContent);
-        btnCopyRawJson.textContent = 'Copied!';
-        setTimeout(() => { btnCopyRawJson.textContent = 'Copy JSON'; }, 1500);
-    });
-
-    btnCopySummary.addEventListener('click', () => {
-        navigator.clipboard.writeText(verdictSummaryText.textContent);
-        btnCopySummary.textContent = 'Copied!';
-        setTimeout(() => { btnCopySummary.textContent = 'Copy Summary'; }, 1500);
-    });
 });

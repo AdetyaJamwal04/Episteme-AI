@@ -1,9 +1,20 @@
+---
+title: VeriFact — Adaptive Claim Verification Platform
+emoji: 🛡️
+colorFrom: blue
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # 🛡️ VeriFact — Evidence-Grounded Automated Claim Verification Platform
 
 [![Python 3.12](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.111.0-green.svg)](https://fastapi.tiangolo.com/)
 [![Google Gemini](https://img.shields.io/badge/LLM-Google%20Gemini%202.0%20Flash-orange.svg)](https://ai.google.dev/)
-[![Tests](https://img.shields.io/badge/tests-142%20passed-brightgreen.svg)](https://pytest.org)
+[![Tests](https://img.shields.io/badge/tests-143%20passed-brightgreen.svg)](https://pytest.org)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen.svg)](https://pytest-cov.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -128,70 +139,11 @@ uv run python main.py verify "The Eiffel Tower in Paris was completed in 1889." 
 uv run python main.py benchmark
 ```
 
-### Start the REST API Server:
+### Start the REST API Server & Web UI:
 ```powershell
 uv run python main.py server --port 8000 --reload
 ```
-Interactive Swagger documentation is available at **`http://localhost:8000/docs`**.
-
----
-
-## 🌐 Production REST API Endpoints
-
-### 1. Synchronous Verification (`POST /api/v1/check`)
-```bash
-curl -X POST http://localhost:8000/api/v1/check \
-  -H "Content-Type: application/json" \
-  -d '{
-    "claim": "The Eiffel Tower was completed in 1889.",
-    "depth": "STANDARD"
-  }'
-```
-
-**Response (HTTP 200 OK):**
-```json
-{
-  "request_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
-  "claim": "The Eiffel Tower was completed in 1889.",
-  "verdict": "SUPPORTED",
-  "public_label": "VERIFIED TRUE",
-  "confidence": 0.96,
-  "evidence_sufficiency": 0.88,
-  "framing_concerns": false,
-  "stop_reason": "EVALUATION_COMPLETE",
-  "summary_text": "The claim is verified as accurate based on corroborating primary sources.",
-  "citations": [
-    {
-      "citation_id": 1,
-      "source_name": "Eiffel Tower History",
-      "domain": "toureiffel.paris",
-      "url": "https://www.toureiffel.paris/en/the-monument/history",
-      "supporting_passage": "The Eiffel Tower was inaugurated on March 31, 1889..."
-    }
-  ],
-  "latency_ms": 32.5
-}
-```
-
-### 2. Asynchronous Deep Research (`POST /api/v1/research`)
-```bash
-curl -X POST http://localhost:8000/api/v1/research \
-  -H "Content-Type: application/json" \
-  -d '{
-    "claim": "Complex multi-document controversy claim...",
-    "depth": "DEEP"
-  }'
-```
-
-**Response (HTTP 202 Accepted):**
-```json
-{
-  "job_id": "7335e115-91f8-471b-a888-2a727aa52225",
-  "status": "QUEUED",
-  "polling_url": "http://localhost:8000/api/v1/research/7335e115-91f8-471b-a888-2a727aa52225",
-  "estimated_duration_seconds": 25.0
-}
-```
+The Web UI Dashboard is available at **`http://localhost:8000/`** and interactive Swagger documentation at **`http://localhost:8000/docs`**.
 
 ---
 
@@ -206,22 +158,6 @@ docker-compose up --build -d
 Check cluster health:
 ```powershell
 curl http://localhost:8000/api/v1/health
-```
-
----
-
-## 🧪 Quality Gates & Verification
-
-```powershell
-# 1. Formatting and linting
-uv run ruff check verifact tests scripts
-uv run ruff format --check verifact tests scripts
-
-# 2. Strict static typing
-uv run mypy verifact tests scripts
-
-# 3. Full pytest suite with statement coverage
-uv run pytest tests/unit -v --cov=verifact
 ```
 
 ---

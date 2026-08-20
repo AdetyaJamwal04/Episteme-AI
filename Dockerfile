@@ -1,5 +1,5 @@
 # ==============================================================================
-# VeriFact — Multi-Stage Production Dockerfile
+# VeriFact — Multi-Stage Production Dockerfile (Hugging Face & Cloud Ready)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -39,28 +39,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Create dedicated non-root user
-RUN groupadd -r verifact && useradd -r -g verifact -d /app verifact
+# Create dedicated non-root user (Hugging Face compatible user 1000)
+RUN useradd -m -u 1000 user
 
 # Copy installed virtual environment from builder
 COPY --from=builder /app/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Copy application source code
-COPY --chown=verifact:verifact . /app
+COPY --chown=user:user . /app
 
 # Create cache directory for ML models
-RUN mkdir -p /home/verifact/.cache/huggingface && chown -R verifact:verifact /home/verifact/.cache
+RUN mkdir -p /home/user/.cache/huggingface && chown -R user:user /home/user/.cache
 
 # Switch to non-root user
-USER verifact
+USER user
+ENV HOME=/home/user \
+    PORT=7860
 
-# Expose API port
-EXPOSE 8000
+# Expose default Hugging Face Spaces port
+EXPOSE 7860
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:8000/api/v1/health || exit 1
+    CMD curl -f http://localhost:${PORT:-7860}/api/v1/health || exit 1
 
-# Default launch command: FastAPI production server
-CMD ["python", "-m", "uvicorn", "verifact.api.app:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]
+# Launch FastAPI web server and UI on $PORT
+CMD ["sh", "-c", "python -m uvicorn verifact.api.app:create_app --factory --host 0.0.0.0 --port ${PORT:-7860}"]
