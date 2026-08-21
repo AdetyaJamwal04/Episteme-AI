@@ -1,9 +1,10 @@
 """
-Adaptive Research Graph Orchestrator implementing the full verification DAG loop.
+Adaptive Research Graph Orchestrator implementing high-throughput concurrent DAG execution.
 """
 
 from __future__ import annotations
 
+import asyncio
 import time
 from uuid import UUID, uuid4
 
@@ -42,7 +43,7 @@ logger = get_logger("research_graph")
 
 
 class ResearchGraphRunner:
-    """Executes the iterative claim verification loop across claims, evidence, and verdict components."""
+    """Executes the iterative claim verification loop with parallelized async retrieval and evaluation."""
 
     def __init__(
         self,
@@ -72,6 +73,33 @@ class ResearchGraphRunner:
         self.aggregator = aggregator or ParentVerdictAggregator()
         self.calibrator = calibrator or ConfidenceCalibrator()
         self.explainer = explainer or GroundedExplanationBuilder()
+
+    async def _fetch_single_doc(
+        self,
+        item,
+        semaphore: asyncio.Semaphore,
+    ) -> tuple[Document, list[Passage]] | None:
+        """Fetch and segment a single URL under concurrency limits."""
+        async with semaphore:
+            try:
+                fetched = await self.fetcher.fetch(item.url)
+                doc_id = uuid4()
+                doc = Document(
+                    document_id=doc_id,
+                    source_id=uuid4(),
+                    url=fetched.url,
+                    canonical_url=fetched.canonical_url,
+                    content_hash=fetched.content_hash,
+                    title=fetched.title or item.title,
+                    author=fetched.author,
+                )
+                passages = segment_document_text(
+                    doc_id, fetched.main_text, target_token_size=300
+                )
+                return doc, passages
+            except Exception as e:
+                logger.warning("Failed to fetch search document", url=item.url, error=str(e))
+                return None
 
     async def execute_research(
         self,
@@ -131,6 +159,7 @@ class ResearchGraphRunner:
         executed_queries: list[str] = []
         latest_evidence_states: dict[UUID, EvidenceState] = {}
         atomic_claims_by_id = {ac.atomic_claim_id: ac for ac in atomic_claims}
+        seen_urls: set[str] = set()
 
         # 2. Iterative Adaptive Loop
         while True:
@@ -158,56 +187,66 @@ class ResearchGraphRunner:
             if not queries_to_run:
                 break
 
-            # Retrieval & Fetching Node
-            for _ac_id, query_str in queries_to_run:
-                if not budget.can_consume_queries(1):
-                    break
+            # Filter valid queries within budget
+            valid_queries = []
+            for ac_id, q_str in queries_to_run:
+                if budget.can_consume_queries(1):
+                    executed_queries.append(q_str)
+                    budget.record_query(1)
+                    valid_queries.append(q_str)
 
-                executed_queries.append(query_str)
-                budget.record_query(1)
+            if not valid_queries:
+                break
 
-                search_resp = await self.search_manager.search(query_str, max_results=3)
-                for item in search_resp.results:
-                    try:
-                        fetched = await self.fetcher.fetch(item.url)
-                        doc_id = uuid4()
-                        doc = Document(
-                            document_id=doc_id,
-                            source_id=uuid4(),
-                            url=fetched.url,
-                            canonical_url=fetched.canonical_url,
-                            content_hash=fetched.content_hash,
-                            title=fetched.title or item.title,
-                            author=fetched.author,
-                        )
-                        docs_by_id[doc_id] = doc
+            # A. Concurrent Parallel Search Execution
+            search_tasks = [
+                self.search_manager.search(q, max_results=3) for q in valid_queries
+            ]
+            search_responses = await asyncio.gather(*search_tasks, return_exceptions=True)
 
-                        doc_passages = segment_document_text(
-                            doc_id, fetched.main_text, target_token_size=300
-                        )
-                        for p in doc_passages:
-                            passages_by_id[p.passage_id] = p
-                    except Exception as e:
-                        logger.warning(
-                            "Failed to fetch search document", url=item.url, error=str(e)
-                        )
-                        continue
+            # Collect unique items across all queries
+            items_to_fetch = []
+            for resp in search_responses:
+                if isinstance(resp, Exception) or not resp or not hasattr(resp, "results"):
+                    continue
+                for item in resp.results:
+                    if item.url not in seen_urls:
+                        seen_urls.add(item.url)
+                        items_to_fetch.append(item)
 
-            # Assessment Node: Evaluate all atomic claims against acquired pool
+            # B. Concurrent Parallel Document Fetching (Semaphore capped at 8)
+            fetch_semaphore = asyncio.Semaphore(8)
+            fetch_tasks = [
+                self._fetch_single_doc(item, fetch_semaphore) for item in items_to_fetch
+            ]
+            fetch_results = await asyncio.gather(*fetch_tasks, return_exceptions=True)
+
+            for res in fetch_results:
+                if isinstance(res, tuple) and res is not None:
+                    doc, passages = res
+                    docs_by_id[doc.document_id] = doc
+                    for p in passages:
+                        passages_by_id[p.passage_id] = p
+
+            # C. Concurrent Assessment Node: Evaluate all atomic claims concurrently
             all_passages = list(passages_by_id.values())
-            current_conflicts = []
-
-            for ac in atomic_claims:
-                (
-                    ev_state,
-                    clusters,
-                    confs,
-                ) = await self.evidence_engine.evaluate_atomic_claim_evidence(
+            assessment_tasks = [
+                self.evidence_engine.evaluate_atomic_claim_evidence(
                     atomic_claim=ac,
                     passages=all_passages,
                     documents_by_id=docs_by_id,
                     top_k=3,
                 )
+                for ac in atomic_claims
+            ]
+            eval_results = await asyncio.gather(*assessment_tasks, return_exceptions=True)
+
+            current_conflicts = []
+            for ac, res in zip(atomic_claims, eval_results):
+                if isinstance(res, Exception):
+                    logger.error("Error evaluating atomic claim", error=str(res))
+                    continue
+                ev_state, clusters, confs = res
                 latest_evidence_states[ac.atomic_claim_id] = ev_state
                 current_conflicts.extend(confs)
                 all_clusters.extend(clusters)

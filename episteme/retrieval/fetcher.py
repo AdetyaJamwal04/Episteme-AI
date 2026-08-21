@@ -1,9 +1,13 @@
-"""Resilient Async HTTP Document Fetcher with SSRF Defense and Size Limits.
+"""
+Resilient Async HTTP Document Fetcher with SSRF Defense and Size Limits.
 
 Fetches web documents over HTTP/HTTPS, enforces 10MB payload size limits,
 validates SSRF security on every redirect hop, and extracts structured text.
 """
 
+from __future__ import annotations
+
+import asyncio
 import hashlib
 
 import httpx
@@ -18,7 +22,7 @@ from episteme.retrieval.security import validate_url_security
 logger = get_logger("http_fetcher")
 
 MAX_DOCUMENT_SIZE_BYTES = 10 * 1024 * 1024  # 10 MB payload cap
-DEFAULT_TIMEOUT_SECONDS = 8.0
+DEFAULT_TIMEOUT_SECONDS = 4.0
 MAX_REDIRECTS = 3
 USER_AGENT = "VeriFact-VerificationBot/1.0 (+https://github.com/your-org/verifact)"
 
@@ -33,6 +37,7 @@ class HTTPDocumentFetcher(DocumentFetcher):
     ) -> None:
         self.timeout = timeout
         self.max_size_bytes = max_size_bytes
+        self._cache: dict[str, FetchedContent] = {}
 
     async def fetch(self, url: str) -> FetchedContent:
         """Download and parse a web document securely.
@@ -48,6 +53,10 @@ class HTTPDocumentFetcher(DocumentFetcher):
         Returns:
             FetchedContent: Clean extracted text, metadata, and hash.
         """
+        # In-memory session deduplication
+        if url in self._cache:
+            return self._cache[url]
+
         # 1. Pre-fetch SSRF validation
         validated_url = validate_url_security(url)
 
@@ -61,9 +70,10 @@ class HTTPDocumentFetcher(DocumentFetcher):
         redirect_count = 0
 
         async with httpx.AsyncClient(
-            timeout=httpx.Timeout(self.timeout),
+            timeout=httpx.Timeout(self.timeout, connect=2.0),
             follow_redirects=False,
             headers=headers,
+            limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
         ) as client:
             while redirect_count <= MAX_REDIRECTS:
                 try:
@@ -128,7 +138,7 @@ class HTTPDocumentFetcher(DocumentFetcher):
 
                     content_hash = hashlib.sha256(main_text.encode("utf-8")).hexdigest()
 
-                    return FetchedContent(
+                    result = FetchedContent(
                         url=url,
                         canonical_url=str(response.url),
                         title=title,
@@ -138,6 +148,8 @@ class HTTPDocumentFetcher(DocumentFetcher):
                         content_hash=content_hash,
                         http_status=response.status_code,
                     )
+                    self._cache[url] = result
+                    return result
 
                 except httpx.RequestError as e:
                     logger.warning("HTTP request failed", url=current_url, error=str(e))
